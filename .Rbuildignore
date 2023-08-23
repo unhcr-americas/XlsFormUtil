@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$
+^app\.R$
+^_pkgdown\.yml$
+^docs$
+^dev$
+^rsconnect$
+^XlsFormUtil\.Rproj$

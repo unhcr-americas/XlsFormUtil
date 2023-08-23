@@ -1,0 +1,79 @@
+---
+title: "Questionnaire Review"
+date: "Version as of `r format(Sys.Date(),  '%d %B %Y')`"
+output:
+  unhcrdown::docx_simple
+params:
+  xlsformfile: "myxlsform.xlsx"
+  label_language: "NULL"  
+  duration: TRUE  
+  logic: TRUE  
+  wpm: "180" # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
+  maxmodalities: "7" # maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation 
+  resptimeclose: "4" # resptimeclose  an average 4 seconds (per default) for respondent to reply for closed questions
+  resptimecondopen: "7" # resptimecondopen an average of  7 seconds (per default) to reply to conditional text question (accounting for question type of "other, please specify"). 
+  resptimeopen: "10" # resptimeopen an average of  10 seconds (per default) to reply to open text question. 
+  avrgrepeat: "3" # avrgrepeat In case of repeat questions, an average 3 repeat (per default) is accounted for. 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,  
+                      fig.cap = TRUE, 
+                      ft.keepnext = F, 
+                      message = FALSE, 
+                      warning = FALSE,
+                      fig.width = 6.27)
+ 
+
+## Need to install from Github
+# remotes::install_github('vidonne/unhcrdown')
+# remotes::install_github('vidonne/unhcrdesign')
+# remotes::install_github('vidonne/unhcrtemplate')
+# remotes::install_github('unhcr-americas/XlsFormUtil')  
+ 
+suppressWarnings(suppressPackageStartupMessages({
+  library(knitr)
+  library(officedown)
+  library(officer)
+  library(flextable)
+  #library(XlsFormUtil)
+  library(stringr)}
+  ))
+
+xlsformpath <- here::here( params$xlsformfile)
+
+# To run the demo file - thanks to https://github.com/pmaengineering/ppp/tree/master/docs 
+#xlsformpath <-  system.file("demo.xlsx", package = "XlsFormUtil")
+```
+
+# Review 
+
+This document was automatically generated from the encoded version of the questionnaire in XlsForm using the  [{XlsFormUtil} package](https://unhcr-americas.github.io/XlsFormUtil/). It is designed to ease the final steps in the questionnaire design process in order to avoid juggling between the encoded and printed versions. Below is an estimation of the duration time for the questionnaire:
+ 
+
+```{r single-bar, echo=FALSE, message=FALSE, warning=FALSE   }
+p <- fct_interview_duration(xlsformpath, 
+                                       params$label_language,
+  # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
+  wpm  = as.integer(params$wpm),
+# maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation
+  maxmodalities = as.integer(params$maxmodalities) ,
+# resptimeclose  an average 4 seconds (per default) for respondent to reply for closed questions
+  resptimeclose  = as.integer(params$resptimeclose),
+# resptimecondopen an average of  7 seconds (per default) to reply to conditional text question (accounting for question type of "other, please specify").
+  resptimecondopen = as.integer(params$resptimecondopen),
+# resptimeopen an average of  10 seconds (per default) to reply to open text question.
+  resptimeopen = as.integer(params$resptimeopen),
+# avrgrepeat In case of repeat questions, an average 3 repeat (per default) is accounted for.
+  avrgrepeat = as.integer(params$avrgrepeat) )
+
+p[["plot"]]
+```
+
+# Content
+
+```{r echo=FALSE, results = 'asis'}
+fct_create_flextable(xlsformpath,  params$label_language)
+```
+
+

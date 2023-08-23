@@ -1,0 +1,27 @@
+function_documentation.Rmd:
+  path: dev/function_documentation.Rmd
+  state: active
+  R:
+  - R/fct_create_flextable.R
+  - R/fct_interview_duration.R
+  - R/fct_render_prettyprint.R
+  - R/fct_tabulate_form.R
+  - R/fct_xlsform_compare.R
+  - R/fct_xlsfrom_language.R
+  - R/run_app.R
+  tests:
+  - tests/testthat/test-fct_xlsfrom_language.R
+  - tests/testthat/test-fct_xlsform_compare.R
+  - tests/testthat/test-fct_interview_duration.R
+  - tests/testthat/test-fct_tabulate_form.R
+  - tests/testthat/test-fct_create_flextable.R
+  - tests/testthat/test-fct_render_prettyprint.R
+  - tests/testthat/test-run_app.R
+  vignettes: vignettes/development.Rmd
+  inflate:
+    flat_file: dev/function_documentation.Rmd
+    vignette_name: Development
+    open_vignette: true
+    check: true
+    document: true
+    overwrite: ask

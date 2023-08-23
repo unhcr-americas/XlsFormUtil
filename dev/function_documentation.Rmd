@@ -1,0 +1,1589 @@
+---
+title: "Function documentation"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+```{r development-load}
+# Load already included functions if relevant
+pkgload::load_all(export_all = FALSE)
+```
+
+<!--
+ For each fo the function you need, add FUSEN chunk through the Rstudio add-in " add {fusen} chunks"
+ -->
+# Data examples to demo the package
+
+<!-- 
+ Store your dataset in a directory named "inst/" at the root of your project.
+ Use it for your tests in this Rmd thanks to `pkgload::load_all()` to make it available
+and `system.file()` to read it in your examples.
+-->
+
+The included demo [xlsform](https://github.com/unhcr-americas/XlsFormUtil/blob/master/inst/demo.xlsx?raw=true) comes from [https://github.com/pmaengineering/ppp](https://github.com/pmaengineering/ppp)
+
+```{r development-2}
+# Run all this chunk in the console directly
+# Create "inst/" directory
+#dir.create(here::here("inst"))
+
+# Example dataset
+# Make your dataset file available to the current Rmd
+pkgload::load_all(path = here::here(), export_all = FALSE)
+
+# You will be able to read your example data file in each of your function examples and tests as follows
+xlsformpath <- system.file("demo.xlsx", package = "XlsFormUtil") 
+ 
+```
+
+
+# fct_xlsfrom_language
+    
+```{r function-fct_xlsfrom_language}
+#' fct_xlsfrom_language
+#' 
+#' Retrieve a factor with all label languages used in a specific xlsform.
+#' Used in the app to retrieve the language to consider based on the form
+#' 
+#' @param xlsformpath path to the file with xlsform
+#' 
+#' @importFrom readxl read_excel
+#' @importFrom dplyr rename mutate filter pull
+#' @importFrom stringr str_remove
+#' 
+#' @return label_language
+#' @export
+
+fct_xlsfrom_language <- function(xlsformpath){
+
+  # xlsformpath <- "inst/RMS_CAPI_v2_en_es_fr.xlsx"
+  survey <- readxl::read_excel(xlsformpath, sheet = "survey")
+  
+  ## Get all variables starting with language
+  label_language <- names(survey) |>
+              as.data.frame() |>
+              dplyr::rename(  "label_language" = "names(survey)" ) |>
+              dplyr::filter(grepl("label", label_language)) |>
+              dplyr::mutate( label_language = stringr::str_remove(label_language,
+                                                                  "label"))|>
+              dplyr::mutate( label_language = stringr::str_remove(label_language,
+                                                                  "::"))
+  ## in case now language was defined... return NULL
+  if(nlevels(as.factor(label_language$label_language)) == 1 )
+  { label_language = NULL} else 
+      { label_language <- label_language |> dplyr::pull()}
+  
+  return(label_language )
+}
+```
+  
+```{r example-fct_xlsfrom_language}
+## With different language
+fct_xlsfrom_language( xlsformpath = system.file("demo.xlsx",
+                                                package = "XlsFormUtil"))
+
+## without language
+fct_xlsfrom_language( xlsformpath = system.file("KoBoXLSFormExamples.xlsx",
+                                                package = "XlsFormUtil"))
+```
+  
+```{r tests-fct_xlsfrom_language}
+# test_that("fct_xlsfrom_language works", {
+#   expect_true(inherits(fct_xlsfrom_language, "function")) 
+# })
+```
+  
+
+# fct_xlsform_compare
+
+```{r function-fct_xlsform_compare}
+#' @title Generate a consolidated xlsform from a list of xlsform in order to 
+#' quickly flag differences
+#' 
+#' @description Note that comparison is done for a selected language
+#'
+#' @param listfile list of  path to multiple xlsform files - ll assumed to be 
+#' in the same folder. The first one will be used as the master to compare the 
+#' other to
+#' 
+#' @param folder where all the files are located
+#' 
+#' @param label_language Language to be used in case you have more than one.
+#'  If not specified, the 'default_language' in the 'settings' worksheet is used. 
+#'  If that is not specified and more than one language is in the XlsForm, 
+#'  the language that comes first within column order will be used.
+#' 
+#' @param fileout  if specified defined the name of the file to save the xlsform
+#' _compare output
+#' 
+#' @importFrom readxl read_excel
+#' @importFrom here here
+#' @importFrom stringr str_remove
+#' @importFrom dplyr rename mutate group_by summarise filter mutate recode
+#'                first distinct select left_join filter pull ungroup full_join
+#' @importFrom readxl read_excel
+#' @importFrom forcats fct_reorder
+#' @importFrom tidyselect starts_with
+#' @importFrom tidyr separate
+#' @importFrom  openxlsx createWorkbook addWorksheet writeData 
+#'               setColWidths addStyle saveWorkbook
+#' 
+#' @return a file
+#' @export
+#'
+fct_xlsform_compare <- function( listfile,
+                             folder,
+                             label_language,
+                             fileout = NULL) {
+  # library(XlsFormUtil)
+  formthis <- listfile[1]
+  xlsformpath = here::here(folder, formthis)
+
+  settings <- readxl::read_excel(xlsformpath,  sheet = "settings")
+  #form_instance <- as.character(settings$form_title)
+
+  ## Check if a default language is set up in the settings - and add the correct separator
+  # for test settings$default_language <- NULL
+  label_language <- ifelse( is.null(label_language),
+                            ifelse( is.null(settings$default_language),
+                                    label_language,
+                                    paste0("::",settings$default_language)),
+                            paste0("::",label_language))
+
+
+  #### Choices master to... ######
+  choicesmaster <- readxl::read_excel(xlsformpath, sheet = "choices") |>
+    # dplyr::mutate(form_instance = form_instance)|>
+    dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+    #  Rename and use what ever label set is coming first
+    dplyr::rename(label = ifelse( is.null(label_language),
+                                  dplyr::first(tidyselect::starts_with("label")),
+                                  paste0("label",label_language)) ,
+                  name = name) |>
+    dplyr::filter(!(is.na(list_name))) |>
+    dplyr::select(list_name ,name, label, form_file)
+  
+  
+   
+  survey <-  readxl::read_excel(xlsformpath, sheet = "survey")
+    if ("required" %in% colnames(survey)) {   } else {    survey$required <- ""   }
+    if ("relevant" %in% colnames(survey)) {   } else {    survey$relevant <- ""   }
+    if ("constraint" %in% colnames(survey)) {   } else {    survey$constraint <- ""   }
+
+  #### Variables master to... ######
+  variablesmaster <-  survey |>
+    ## Rename and use what ever label set is coming first
+    dplyr::rename(label = ifelse( is.null(label_language), 
+                                  dplyr::first(tidyselect::starts_with("label")), 
+                                  paste0("label",label_language)),
+                  hint =  ifelse( is.null(label_language), 
+                                  dplyr::first(tidyselect::starts_with("hint")),
+                                  paste0("hint",label_language))  ) |>
+
+    #dplyr::mutate(form_instance = form_instance)|>
+    dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+
+    # Clean the begin and end in case the _ would be missing...
+    dplyr::mutate(type = dplyr::recode(type,
+                                       "begin group" = "begin_group" ,
+                                       "end group"   ="end_group",
+                                       "begin repeat" = "begin_repeat" ,
+                                       "end repeat"   ="end_repeat")) |>
+
+    ## separate the type
+    tidyr::separate(type,
+                    into = c("type", "list_name"),
+                    sep = " ",
+                    fill = "right")   |>
+
+    # dplyr::mutate(name_type = glue::glue('{name} \n *(type: {type})')) |>
+    # dplyr::mutate(label_hint = glue::glue('{label} \n *(hint: {hint})')) |>
+    dplyr::mutate(name_type = paste0(name, "\n *(type: ",type, ")")) |>
+    dplyr::mutate(label_hint = paste0(
+      ifelse(is.na(label), "no label", label),
+      ifelse(is.na(hint), "",
+             paste0("\n *(hint: ", hint, ")")
+      ) )) |>
+
+    ## Need to add more cleaning in case...
+    dplyr::filter(!(is.na(type))) |>
+    dplyr::select(type, list_name, name, label, hint, required, relevant, constraint, 
+                  form_file)
+
+  ## initiate comparison
+  choicescompare <- choicesmaster
+  variablescompare <- variablesmaster
+
+  #### Now looping around the list of file to compare the master to... ######
+  for ( i in 2:length(listfile ))  {
+    # i <- 2
+    formthis <- listfile[i]
+    cat(paste0(formthis, "\n\n"))
+    xlsformpath = here::here(folder, formthis)
+    #variables <- fct_tabulate_form(xlsformpath, label_language )
+    settings <- readxl::read_excel(xlsformpath,  sheet = "settings")
+    #form_instance <- as.character(settings$form_title)
+    choices <- readxl::read_excel(xlsformpath, sheet = "choices") |>
+      # dplyr::mutate(form_instance = form_instance)|>
+      dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+      #  Rename and use what ever label set is coming first
+      dplyr::rename(label = ifelse( is.null(label_language), 
+                                    dplyr::first(tidyselect::starts_with("label")),
+                                    paste0("label",label_language)) ,
+                    name = name)  |>
+      dplyr::filter(!(is.na(list_name))) |>
+      dplyr::select(list_name ,name, label, form_file)
+
+    ### Add & diff
+    choicescompare <- dplyr::full_join(choicescompare, choices,
+                                       by = c("list_name", "name"), 
+                                       suffix=c("",".diff") )|>
+      dplyr::filter(!(is.na(list_name))) |>
+      ##  clean the diff type comparison
+      dplyr::mutate ( label.diff = dplyr::case_when(is.na(label) ~ label.diff,
+                                                    is.na(label.diff) ~ "<<missing>>",
+                                                    label.diff == label ~  NA_character_,
+                                                    label.diff != label ~  label.diff )
+                      #label.diff = dplyr::if_else(is.na(label),label.diff , dplyr::if_else( label.diff == label, NA_character_, label.diff ))
+      )
+    ## Rename diff based on type and file origin
+    eval(parse(text=paste0("choicescompare$label.ifdiff.", 
+                           stringr::str_remove(formthis, ".xlsx"),
+                           " <- choicescompare$label.diff ") ))
+    choicescompare$label.diff <- NULL
+    choicescompare$form_file <- NULL
+    choicescompare$form_file.diff <- NULL
+
+    
+    
+    ## Now variable ####
+      survey <-  readxl::read_excel(xlsformpath, sheet = "survey")
+    if ("required" %in% colnames(survey)) {   } else {    survey$required <- ""   }
+    if ("relevant" %in% colnames(survey)) {   } else {    survey$relevant <- ""   }
+    if ("constraint" %in% colnames(survey)) {   } else {    survey$constraint <- ""   }
+    
+    variables <-  survey |>
+      ## Rename and use what ever label set is coming first
+      dplyr::rename(label = ifelse( is.null(label_language), 
+                                    dplyr::first(tidyselect::starts_with("label")), 
+                                    paste0("label",label_language)),
+                    hint =  ifelse( is.null(label_language),
+                                    dplyr::first(tidyselect::starts_with("hint")),
+                                    paste0("hint",label_language))   ) |>
+      #dplyr::mutate(form_instance = form_instance)|>
+      dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+      # Clean the begin and end in case the _ would be missing...
+      dplyr::mutate(type = dplyr::recode(type,
+                                         "begin group" = "begin_group" ,
+                                         "end group"   ="end_group",
+                                         "begin repeat" = "begin_repeat" ,
+                                         "end repeat"   ="end_repeat")) |>
+      ## separate the type
+      tidyr::separate(type,
+                      into = c("type", "list_name"),
+                      sep = " ",
+                      fill = "right") |>
+    ## Need to add more cleaning in case...
+    dplyr::filter(!(is.na(type))) |>
+    dplyr::select(type, list_name, name, label, hint, required, relevant, constraint,  form_file) #|>
+    #dplyr::distinct()
+
+    ### Add & diff
+    variablescompare <-
+      dplyr::full_join(variablescompare,
+                       variables,
+                       by = c("name"),
+                       suffix = c("", ".diff")) |>
+      dplyr::filter(!(is.na(name))) |> 
+      ##  clean the diff type comparison
+
+      dplyr::mutate (type.diff = dplyr::case_when(is.na(type) ~ type.diff,
+                                                  is.na(type.diff) ~ "<<missing>>",
+                                                  type.diff == type ~  NA_character_ ,
+                                                  type.diff != type ~ type.diff ) ,
+                     list_name.diff = dplyr::case_when(is.na(list_name) ~ list_name.diff,
+                                                       is.na(list_name.diff) ~ "<<missing>>",
+                                                       list_name.diff == list_name ~ NA_character_,
+                                                       list_name.diff != list_name ~  list_name.diff ),
+                     label.diff = dplyr::case_when(is.na(label) ~ label.diff,
+                                                   is.na(label.diff) ~ "<<missing>>",
+                                                   label.diff == label ~  NA_character_,
+                                                   label.diff != label ~  label.diff ),
+                     hint.diff = dplyr::case_when(is.na(hint) ~ hint.diff,
+                                                  is.na(hint.diff) ~ "<<missing>>",
+                                                  hint.diff == hint ~  NA_character_,
+                                                  hint.diff != hint ~  hint.diff ),
+                     required.diff = dplyr::case_when(is.na(required) ~ required.diff,
+                                                      is.na(required.diff) ~ "<<missing>>",
+                                                      required.diff == required ~  NA_character_,
+                                                      required.diff != required ~  required.diff ),
+                     constraint.diff = dplyr::case_when(is.na(constraint) ~ constraint.diff,
+                                                        is.na(constraint.diff) ~ "<<missing>>",
+                                                        constraint.diff == constraint ~ NA_character_,
+                                                        constraint.diff != constraint ~  constraint.diff ),
+                     relevant.diff = dplyr::case_when(is.na(relevant) ~ relevant.diff,
+                                                      is.na(relevant.diff) ~ "<<missing>>",
+                                                      relevant.diff == relevant ~  NA_character_,
+                                                      relevant.diff != type ~  relevant.diff ))
+
+
+
+
+
+    # dplyr::mutate (type.diff = dplyr::if_else(is.na(type),type.diff , dplyr::if_else(type.diff == type, NA_character_, type.diff )),
+    #                list_name.diff = dplyr::if_else(is.na(list_name),list_name.diff , dplyr::if_else( list_name.diff == list_name, NA_character_, list_name.diff )),
+    #                label.diff = dplyr::if_else(is.na(label),label.diff , dplyr::if_else( label.diff == label, NA_character_, label.diff )),
+    #                hint.diff = dplyr::if_else(is.na(hint),hint.diff , dplyr::if_else( hint.diff == hint, NA_character_, hint.diff )),
+    #                required.diff = dplyr::if_else(is.na(required),required.diff , dplyr::if_else( required.diff == required, NA_character_, required.diff )),
+    #                constraint.diff = dplyr::if_else(is.na(constraint),constraint.diff , dplyr::if_else( constraint.diff == constraint, NA_character_, constraint.diff )),
+    #                relevant.diff = dplyr::if_else(is.na(relevant),relevant.diff , dplyr::if_else( relevant.diff == relevant, NA_character_, relevant.diff )))
+    ## Rename diff based on type and file origin
+    eval(parse(
+      text = paste0(
+        "variablescompare$type.ifdiff.",
+        stringr::str_remove(formthis, ".xlsx"),
+        " <- variablescompare$type.diff "
+      )
+    ))
+    eval(parse(
+      text = paste0(
+        "variablescompare$list_name.ifdiff.",
+        stringr::str_remove(formthis, ".xlsx"),
+        " <- variablescompare$list_name.diff "
+      )
+    ))
+    eval(parse(
+      text = paste0(
+        "variablescompare$label.ifdiff.",
+        stringr::str_remove(formthis, ".xlsx"),
+        " <- variablescompare$label.diff "
+      )
+    ))
+    eval(parse(
+      text = paste0(
+        "variablescompare$hint.ifdiff.",
+        stringr::str_remove(formthis, ".xlsx"),
+        " <- variablescompare$hint.diff "
+      )
+    ))
+    eval(parse(
+      text = paste0(
+        "variablescompare$required.ifdiff.",
+        stringr::str_remove(formthis, ".xlsx"),
+        " <- variablescompare$required.diff "
+      )
+    ))
+    eval(parse(
+      text = paste0(
+        "variablescompare$constraint.ifdiff.",
+        stringr::str_remove(formthis, ".xlsx"),
+        " <- variablescompare$constraint.diff "
+      )
+    ))
+    eval(parse(
+      text = paste0(
+        "variablescompare$relevant.ifdiff.",
+        stringr::str_remove(formthis, ".xlsx"),
+        " <- variablescompare$relevant.diff "
+      )
+    ))
+    #and remove previous column
+    variablescompare$type.diff <- NULL
+    variablescompare$list_name.diff <- NULL
+    variablescompare$label.diff <- NULL
+    variablescompare$hint.diff <- NULL
+    variablescompare$required.diff <- NULL
+    variablescompare$relevant.diff <- NULL
+    variablescompare$constraint.diff <- NULL
+    variablescompare$form_file <- NULL
+    variablescompare$form_file.diff <- NULL
+
+  }
+
+
+  variablescompare <- variablescompare |>
+    dplyr::select( name,
+                   type,
+                   tidyselect::starts_with("type.ifdiff."),
+                   list_name,
+                   tidyselect::starts_with("list_name.ifdiff."),
+                   label,
+                   tidyselect::starts_with("label.ifdiff."),
+                   hint,
+                   tidyselect::starts_with("hint.ifdiff."),
+                   required,
+                   tidyselect::starts_with("required.ifdiff."),
+                   relevant,
+                   tidyselect::starts_with("constraint.ifdiff."),
+                   constraint,
+                   tidyselect::starts_with("relevant.ifdiff")
+    )
+
+  choicescompare <- choicescompare |>
+    dplyr::select( name,
+                   list_name,
+                   label,
+                   starts_with("label.ifdiff.")  )
+
+  # names(variablescompare)
+  # names(choicescompare)
+
+  ## Save in Excel if fileout is not null
+  if ( !(is.null(fileout))) {
+        ## Create a blank workbook
+        wb <- openxlsx::createWorkbook()
+
+        # Excel Styling Elements
+        # To add filters for sheet, we have to set the range for addAutoFilter() function
+        # EX: addAutoFilter(sheet1, "A1:P1") --> add a filter on the 1rd row, columns A:P
+        # dfref dataframe allows to find 'P' based on number of columns in the sheet, if number of columns equal to 6 then the range will be A1:dfref[6,] -- A1:F1
+        dfref <- data.frame(
+          key = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256),
+          val = c('A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1', 'L1', 'M1', 'N1', 'O1', 'P1', 'Q1', 'R1', 'S1', 'T1', 'U1', 'V1', 'W1', 'X1', 'Y1', 'Z1', 'AA1', 'AB1', 'AC1', 'AD1', 'AE1', 'AF1', 'AG1', 'AH1', 'AI1', 'AJ1', 'AK1', 'AL1', 'AM1', 'AN1', 'AO1', 'AP1', 'AQ1', 'AR1', 'AS1', 'AT1', 'AU1', 'AV1', 'AW1', 'AX1', 'AY1', 'AZ1', 'BA1', 'BB1', 'BC1', 'BD1', 'BE1', 'BF1', 'BG1', 'BH1', 'BI1', 'BJ1', 'BK1', 'BL1', 'BM1', 'BN1', 'BO1', 'BP1', 'BQ1', 'BR1', 'BS1', 'BT1', 'BU1', 'BV1', 'BW1', 'BX1', 'BY1', 'BZ1', 'CA1', 'CB1', 'CC1', 'CD1', 'CE1', 'CF1', 'CG1', 'CH1', 'CI1', 'CJ1', 'CK1', 'CL1', 'CM1', 'CN1', 'CO1', 'CP1', 'CQ1', 'CR1', 'CS1', 'CT1', 'CU1', 'CV1', 'CW1', 'CX1', 'CY1', 'CZ1', 'DA1', 'DB1', 'DC1', 'DD1', 'DE1', 'DF1', 'DG1', 'DH1', 'DI1', 'DJ1', 'DK1', 'DL1', 'DM1', 'DN1', 'DO1', 'DP1', 'DQ1', 'DR1', 'DS1', 'DT1', 'DU1', 'DV1', 'DW1', 'DX1', 'DY1', 'DZ1', 'EA1', 'EB1', 'EC1', 'ED1', 'EE1', 'EF1', 'EG1', 'EH1', 'EI1', 'EJ1', 'EK1', 'EL1', 'EM1', 'EN1', 'EO1', 'EP1', 'EQ1', 'ER1', 'ES1', 'ET1', 'EU1', 'EV1', 'EW1', 'EX1', 'EY1', 'EZ1', 'FA1', 'FB1', 'FC1', 'FD1', 'FE1', 'FF1', 'FG1', 'FH1', 'FI1', 'FJ1', 'FK1', 'FL1', 'FM1', 'FN1', 'FO1', 'FP1', 'FQ1', 'FR1', 'FS1', 'FT1', 'FU1', 'FV1', 'FW1', 'FX1', 'FY1', 'FZ1', 'GA1', 'GB1', 'GC1', 'GD1', 'GE1', 'GF1', 'GG1', 'GH1', 'GI1', 'GJ1', 'GK1', 'GL1', 'GM1', 'GN1', 'GO1', 'GP1', 'GQ1', 'GR1', 'GS1', 'GT1', 'GU1', 'GV1', 'GW1', 'GX1', 'GY1', 'GZ1', 'HA1', 'HB1', 'HC1', 'HD1', 'HE1', 'HF1', 'HG1', 'HH1', 'HI1', 'HJ1', 'HK1', 'HL1', 'HM1', 'HN1', 'HO1', 'HP1', 'HQ1', 'HR1', 'HS1', 'HT1', 'HU1', 'HV1', 'HW1', 'HX1', 'HY1', 'HZ1', 'IA1', 'IB1', 'IC1', 'ID1', 'IE1', 'IF1', 'IG1', 'IH1', 'II1', 'IJ1', 'IK1', 'IL1', 'IM1', 'IN1', 'IO1', 'IP1', 'IQ1', 'IR1', 'IS1', 'IT1', 'IU1', 'IV1')
+        )
+
+        #For better legibility create specific styles for rows that defines header
+        headerSt <- openxlsx::createStyle( textDecoration = "bold", fontColour = "white", fontSize = 13, fgFill = "grey50",
+                                           border = "TopBottom", borderColour = "grey80", borderStyle = "thin")
+        #For better legibility create specific styles for rows that defines groups
+        cs1 <- openxlsx::createStyle( textDecoration = "bold", fontColour = "black", fgFill = "orange",
+                                      border = "TopBottom", borderColour = "orange", borderStyle = "thin")
+        #For better legibility create specific styles for rows that defines repeat
+        cs2 <- openxlsx::createStyle( textDecoration = "bold", fontColour = "white", fgFill = "skyblue",
+                                      border = "TopBottom", borderColour = "skyblue", borderStyle = "thin")
+        sheetname <- "variablescompare"
+        openxlsx::addWorksheet(wb, sheetname)
+        openxlsx::writeData(wb, sheetname, variablescompare, withFilter = TRUE)
+        openxlsx::setColWidths(wb, sheetname, cols = 1:ncol(variablescompare), widths = "auto")
+        all.cols <- 1:ncol(variablescompare)
+        hdr.rows <- 1
+        group.rows <- which(stringr::str_detect(variablescompare$type, "group"))+1
+        repeat.rows <- which(stringr::str_detect(variablescompare$type, "repeat"))+1
+        openxlsx::addStyle(wb, sheetname, headerSt, hdr.rows, all.cols, gridExpand = TRUE)
+        openxlsx::addStyle(wb, sheetname, cs1, group.rows, all.cols, gridExpand = TRUE)
+        openxlsx::addStyle(wb, sheetname, cs2, repeat.rows, all.cols, gridExpand = TRUE)
+
+        sheetname <- "choicescompare"
+        openxlsx::addWorksheet(wb, sheetname)
+        openxlsx::writeData(wb, sheetname, choicescompare, withFilter = TRUE)
+        openxlsx::setColWidths(wb, sheetname, cols = 1:ncol(choicescompare), widths = "auto")
+
+        xlsformpathout <- here::here(folder,fileout)
+       # wb
+        if (file.exists(xlsformpathout)) file.remove(xlsformpathout)
+        cat( paste0(xlsformpathout,"\n"))
+        openxlsx::saveWorkbook(wb, file = xlsformpathout, overwrite = FALSE, returnValue = FALSE)
+  }
+
+  diffinform <-list(variablescompare,choicescompare )
+  return(diffinform)
+
+}
+ 
+
+```
+
+```{r examples-fct_xlsform_compare}
+
+check <- fct_xlsform_compare(
+          listfile = c( "demo.xlsx","demo_adapt1.xlsx","demo_adapt2.xlsx"),  
+          folder = stringr::str_sub(system.file("", package = "XlsFormUtil"), 
+                                    end = -1) ,                    
+          label_language = NULL,
+          fileout = NULL)
+
+# variablescompare,
+knitr::kable(utils::head(as.data.frame(check[1]), 10))
+# choicescompare
+knitr::kable(utils::head(as.data.frame(check[2]), 10, 10))
+
+```
+
+```{r tests-fct_xlsform_compare}
+# test_that("skeleton works", {
+# 
+# })
+```
+
+
+# fct_interview_duration
+
+```{r function-fct_interview_duration}
+#' @title Prepare a summary estimation of the interview duration. 
+#' 
+#' @description When designing a questionnaire, it is key to keep the interview
+#'  duration under control.  Ideally less than 20 minutes for a phone interview 
+#'  and less than 40 minutes for a face to face interview. 
+#' 
+#' The function is designed to provide a rough estimate (aka a guesstimate...) 
+#' of the interview duration in order to assess this element of questionnaire 
+#' design quality. If the questionnaire takes too long, then one needs to trim 
+#' it or split it into multiple ones...
+#' 
+#' The estimations provided in that function are based on a series of assumptions
+#'  and accounts for the following elements:  
+#'  
+#'   * the time needed to read the label of the questions - or the note -
+#'    Questions hint are not accounted for as they tips for enumerator and not
+#'     to be read to respondent;   
+#'     
+#'   * the time needed to read the question modalities - as there's nothing in 
+#'   xlsform that tells whether the enumerator is expected to read loudly the 
+#'   potential answers in case of closed question, the function has a parameter 
+#'   to account for it;   
+#'   
+#'  * the time need to answer the question - here we are accounting for 3 
+#'  distinct situations, each of them with a different potential duration: 
+#'  - close questions - open questions and open questions set up under skip logic
+#'   so typically - the "if other, specify" - each comes with distinct response time;   
+#'   
+#'  * the time needed when we have a "repeat" block - typically questions repeated 
+#'  for a family roster;
+#'  
+#'
+#' @param xlsformpath path to the file with xlsform
+#' @param label_language Language to be used in case you have more than one. 
+#' If not specified, the 'default_language' in the 'settings' worksheet is used.
+#'  If that is not specified and more than one language is in the XlsForm, 
+#'  the language that comes first within column order will be used.
+#' 
+#' @param wpm  word per minute - an average 180 word per minute (per default) 
+#' required to read loudly the text
+#' @param maxmodalities if more than 7 potential answers for a select question 
+#' (per default)- then we assume that those modalities will not be read by the 
+#' enumerator - but rather selected based on an open answer - and not be 
+#' accounted for the modalities duration estimation
+#' @param resptimeclose  an average 4 seconds (per default) for respondent to
+#'  reply for closed questions
+#' @param resptimecondopen an average of  7 seconds (per default) to reply 
+#' to conditional text question (accounting for question type of 
+#' "other, please specify"). 
+#' @param resptimeopen an average of  10 seconds (per default) to reply to 
+#' open text question. 
+#' @param avrgrepeat In case of repeat questions, an average 3 repeat 
+#' (per default) is accounted for. 
+#' 
+#' @importFrom stringr str_count
+#' @importFrom dplyr rename mutate group_by summarise filter mutate recode
+#'                first distinct select left_join filter pull ungroup
+#' @importFrom readxl read_excel
+#' @importFrom forcats fct_reorder
+#' @importFrom tidyselect starts_with
+#' @importFrom tidyr separate replace_na
+#' @importFrom cli cli_alert_warning
+#' @import ggplot2 
+#'              
+#' @return a list with a summary review in a visual format as a gpplot2 chart
+#' @export
+#' 
+#' 
+fct_interview_duration <- function(xlsformpath,  
+                               label_language = NULL,
+                               wpm  = 180, 
+                               maxmodalities = 7 , 
+                               resptimeclose  = 4,
+                               resptimecondopen = 7,
+                               resptimeopen = 10,
+                               avrgrepeat = 3) {
+  #require(ggplot2) 
+  
+  # xlsformpath <- "inst/RMS_CAPI_v2_en_es_fr.xlsx"
+  survey <- readxl::read_excel(xlsformpath, sheet = "survey")
+  
+  choices <- readxl::read_excel(xlsformpath, sheet = "choices") 
+  
+  settings <- readxl::read_excel(xlsformpath,  sheet = "settings")
+  
+  ## Check if a default language is set up in the settings - and add the correct separator
+  
+   if(is.null(label_language)) {
+    cli::cli_alert_warning("You did not set up any language requirement to launch the functions... Are you sure your xlsform does not include any language specifification like {.code English (eng)} or {.code Espa\u00f1ol (es)} or {.code Fran\u00e7ais (fr)}  ")
+ } 
+  
+  
+  # for test settings$default_language <- NULL
+  label_language <- ifelse( is.null(label_language),
+                                      ifelse( is.null(settings$default_language), 
+                                             label_language, 
+                                             paste0("::",settings$default_language)),
+                                     paste0("::",label_language))
+  #label_language 
+  
+  modalities <- choices |>
+      ## Rename and use what ever label set is coming first 
+      dplyr::rename(labelmod = ifelse( is.null(label_language), dplyr::first(tidyselect::starts_with("label")), paste0("label",label_language))  ,
+                    namemod = name) |>
+      ## Estimate how long is need to read the modalities
+      dplyr::mutate( labelmod_word = stringr::str_count(labelmod , "\\S+") ) |>
+      dplyr::mutate( labelmod_duration = labelmod_word / (wpm/60) ) |>
+      ## Calculate number modalities per list_name - if more than 8 - then we assume that
+      ## those modalities will not be read by the enumerator and not be accounted for the interview duration estimation
+      dplyr::group_by(list_name) |>
+      dplyr::summarise( count = dplyr::n(),
+                        num_word = sum(labelmod_word),
+                        readtime = sum(labelmod_duration) )  |>
+      dplyr::ungroup()
+    
+  ## Add a hint column in case it's not there per default
+  if (any(stringr::str_detect(colnames(survey), "hint" ) ) ) { } else {  survey$hint <- NA  }
+  
+  variables <-  survey |>
+      ## Rename and use what ever label set is coming first 
+      dplyr::rename(label = ifelse( is.null(label_language), dplyr::first(tidyselect::starts_with("label")), paste0("label",label_language)),
+                    hint =  ifelse( is.null(label_language), dplyr::first(tidyselect::starts_with("hint")), paste0("hint",label_language)) #,
+                   # constraint_message =  dplyr::first(tidyselect::starts_with("constraint_message"))
+                   # constraint_message = ifelse( is.null(label_language), dplyr::first(tidyselect::starts_with("constraint_message")), paste0("constraint_message",label_language))
+                    ) |>
+      # Take if it's only a label question used fo formatting.. 
+      #dplyr::filter( appearance !=  "label") |>
+      dplyr::filter( ! (is.na(label))) |>
+    
+      # Clean the begin and end in case the _ would be missing...
+      dplyr::mutate(type = dplyr::recode(type, 
+                                          "begin group" = "begin_group" ,
+                                          "end group"   ="end_group",
+                                         "begin repeat" = "begin_repeat" ,
+                                         "end repeat"   ="end_repeat")) |>
+      ## separate the type
+      tidyr::separate(type, 
+                          into = c("type", "list_name"), 
+                          sep = " ",
+                          fill = "right") |>
+    
+      # capturing repeat
+      dplyr::mutate(repeatvar  = purrr::accumulate2(type, name,
+                                                      function (repeatvar, type, name) {
+                                                        if (type  == "begin_repeat")  c(repeatvar, name)
+                                                        else if (type  == "end_repeat") utils::head(repeatvar, -1)
+                                                        else repeatvar
+                                                      }, .init = character()) |> utils::tail(-1),
+                      ##Apply a function to each element of a list 
+                      repeatvar = purrr::map_chr(repeatvar,
+                                                 stringr::str_c, 
+                                                 collapse = ".") ,
+                      name = dplyr::case_when(repeatvar == "" ~ name,
+                                              type == "begin_repeat"~ repeatvar,
+                                              TRUE ~ stringr::str_c(repeatvar, name, sep = ".")))  |>
+    
+    
+    ## Remove "silent" question type --
+    dplyr::filter( ! (type %in% c("calculate", "end_repeat", "end_group", "start","end", "simserial", "deviceid", "phonenumber", "geopoint" ))    ) |>   
+    
+    ## Reclassify question type for the summary
+    dplyr::mutate(type2 = dplyr::recode(type, "begin_group"="Section",
+                                               "begin_repeat"="Section",
+                                               "date"="date",
+                                               "integer"="number",
+                                               "numeric"="number",
+                                               "note"= "note", 
+                                               "acknowledge"="select", 
+                                               "select_multiple"="select",
+                                               "select_one"="select",
+                                               "select_one_from_file"="select",
+                                               "text"= "text") ) |>
+    
+    ## Apply duration simulation of 4 types
+    
+    ## Time to read the question label
+    dplyr::mutate( label_duration = ifelse( type %in% c("note", "text", "integer", "numeric", "date","select_multiple", "select_one", "select_one_from_file"), 
+                                               stringr::str_count(label , "\\S+") / (wpm/60), 
+                                               0    )   ) |>
+    ## Time to read the potential answer for select questions
+    dplyr::left_join(modalities, by = c("list_name")) |>
+    dplyr::mutate( modality_duration = ifelse( type %in% c("select_multiple", "select_one") & count <= maxmodalities , 
+                                               readtime, 
+                                               0    )   ) |>    
+    
+    ## Time for respondent to reply
+    dplyr::mutate( response_duration = dplyr::case_when(type %in% c( "integer",  "numeric", "date","select_multiple", "select_one", "select_one_from_file") ~ resptimeclose,
+                                                ( type %in% c( "text") & is.na(constraint))  ~ resptimecondopen,
+                                                ( type %in% c( "text") & !(is.na(constraint)))  ~ resptimeopen)   ) |>
+    
+    ## Time to loop around repeat questions
+    dplyr::mutate_at(vars(label_duration, modality_duration, response_duration), ~ tidyr::replace_na(., 0))  |>
+    dplyr::mutate( repeat_duration = ifelse( !(repeatvar == ""), 
+                                              (label_duration + modality_duration + response_duration) * (avrgrepeat -1) , 
+                                               0    )   )  |>
+    # Full duration
+    dplyr::mutate( question_duration = label_duration+ modality_duration+ response_duration+repeat_duration ) |>
+    
+    # Cumulative duration
+    dplyr::mutate( question_duration_sum = cumsum(question_duration) / 60  ) |>
+    
+    ## Add a sequence
+    dplyr::mutate( order = dplyr::row_number() ) |> 
+    dplyr::mutate( seq= paste0(order,"_", type) ) |>
+    dplyr::mutate( is_repeated = ifelse(repeatvar =="","once", "repeated")) |>
+    dplyr::mutate( is_note = ifelse(type =="note", "yes","no")) |>
+    dplyr::mutate( is_question = ifelse(type %in% c("text", "integer", "numeric", "date","select_multiple", "select_one", "select_one_from_file"), "yes","no"))|>
+    dplyr::ungroup()
+  
+  #  dplyr::mutate( seq= as.factor(seq, forcats::fct_reorder(seq, order)   ) )
+  
+  ## order the questions
+  variables$seq= factor(variables$seq, forcats::fct_reorder(variables$seq, -variables$order) )
+  
+  ## View summary calculation to check
+  # View(variables |> dplyr::select(type, name, label,  is_question, is_note, is_repeated, label_duration ,count, modality_duration, response_duration, repeat_duration, question_duration , question_duration_sum ))
+  
+  ## Key metrics for the chart title
+  totaldur <- round(sum(variables$question_duration)/60,0) 
+  totalnote <- variables |> 
+                dplyr::group_by( is_note ) |> 
+                dplyr::summarise(count = dplyr::n()) |> 
+                dplyr::filter( is_note =="yes") |> 
+                dplyr::ungroup() |> 
+                dplyr::pull()
+
+  totalquestion <- variables |> 
+                   dplyr::group_by(is_question) |> 
+                   dplyr::summarise(count = dplyr::n()) |> 
+                   dplyr::filter( is_question =="yes") |>
+                   dplyr::ungroup() |> 
+                   dplyr::pull()
+
+  totalrepeatedquestion <- variables |> 
+                           dplyr::group_by(is_question, is_repeated) |> 
+                           dplyr::summarise(count = dplyr::n()) |>
+                           dplyr::ungroup()|> 
+                           dplyr::filter( is_question =="yes" & is_repeated == "repeated") |> 
+                           dplyr::pull()
+  
+  #Scaling factor for the second axis
+  sf <- max(variables$question_duration_sum)
+  
+  ## Building a visual summary of the interview duration  
+  p <-  ggplot(variables) +
+          geom_bar(mapping = aes(x = seq, 
+                                 y = question_duration, 
+                                 fill = type2),
+                   stat = "identity", 
+                   position = "identity") +
+          geom_line(mapping = aes(x = seq, 
+                                  y = question_duration_sum, 
+                                  color = is_repeated,
+                                  group = 1),
+                    #colour = "red", 
+                    linewidth = 3 ) +  
+          scale_x_discrete(guide = guide_axis(check.overlap = TRUE)) +
+          scale_fill_viridis_d(option = "inferno") +
+          scale_y_continuous(
+               name = "Question duration (bar)", 
+               sec.axis = sec_axis(~ .  *sf , 
+                                   name = "Interview Duration (line)")) +
+         # coord_flip() + 
+          labs(title = stringr::str_wrap(paste0("Estimated interview duration is around ", totaldur," minutes for a total of ",
+                              totalnote,                               " notes and ",
+                              totalquestion, 
+                              " questions, among which ",
+                              totalrepeatedquestion,
+                              " are repeated" ), 100),
+               
+               subtitle = stringr::str_wrap(paste0("Assumptions: ",
+                    wpm, " words per minute, an average of ",
+                    resptimeclose, " seconds for respondent to reply to closed questions, ",
+                    resptimecondopen , " seconds to conditional text question, ",
+                    resptimeopen, " seconds to open text question. An average ", 
+                    avrgrepeat, " repeat records (if included) and a maximum of ", 
+                    maxmodalities, " potential answers for closed questions to read loudly by the enumerator."),
+                                 115), 
+               x = "", y = "", caption = "Built with XlsFormUtil package") +
+          theme_minimal( base_size = 8) +
+          geom_vline(xintercept = 0, size = 1.1, colour = "#333333") +
+          theme( panel.grid.major.x  = element_blank(),
+                 panel.grid.major.y  = element_line(color = "#cbcbcb"),
+                 panel.grid.minor = element_blank()   ,
+                 legend.position = "bottom",legend.title=element_blank(),
+                 axis.text.x = element_text(angle = 90),
+                 plot.title.position = "plot")  
+          
+  
+    result <- list( plot = p,
+                    totaldur = totaldur,
+                    variables = variables)
+  
+  
+     return(result)
+    
+}
+ 
+
+```
+
+```{r examples-fct_interview_duration, fig.width=9, }
+## Generate the summary chart
+result <- fct_interview_duration( 
+  xlsformpath = system.file("demo.xlsx", package = "XlsFormUtil"), 
+  label_language = NULL,
+  # wpm  word per minute - an average 180 word per minute (per default) required 
+  #to read loudly the text
+  wpm  = 180, 
+# maxmodalities if more than 7 potential answers for a select question 
+#(per default)- then we assume that those modalities will not be read by the
+# enumerator - but rather selected based on an open answer - and not be
+# accounted for the modalities duration estimation
+  maxmodalities = 7 , 
+# resptimeclose  an average 4 seconds (per default) for respondent to reply for
+# closed questions
+  resptimeclose  = 4,
+# resptimecondopen an average of  7 seconds (per default) to reply to conditional
+# text question (accounting for question type of "other, please specify"). 
+  resptimecondopen = 7,
+# resptimeopen an average of  10 seconds (per default) to reply to open text
+# question. 
+  resptimeopen = 10,
+# avrgrepeat In case of repeat questions, an average 3 repeat (per default) is
+# accounted for. 
+  avrgrepeat = 3 
+  )
+
+result[["plot"]]
+result[["totaldur"]]
+
+knitr::kable(head(result[["variables"]], 15))
+
+```
+
+```{r tests-fct_interview_duration}
+# test_that("skeleton works", {
+# 
+# })
+```
+
+
+
+# fct_tabulate_form
+
+```{r function-fct_tabulate_form}
+#' @title Combine the xlsform in single table for pretty printing
+#'
+#' @param xlsformpath path to the file with xlsform
+#' @param label_language Language to be used in case you have more than one. 
+#' If not specified, the 'default_language' in the 'settings' worksheet is used.
+#'  If that is not specified and more than one language is in the XlsForm, 
+#'  the language that comes first within column order will be used.
+#' @param logic TRUE per default put to FALSE to take out the printing of 
+#'              constraints.
+#' 
+#' @importFrom readxl read_excel
+#' @importFrom dplyr rename mutate recode first distinct select left_join filter
+#' @importFrom tidyselect starts_with
+#' @importFrom tidyr separate
+#' @importFrom stringr str_replace_all
+#' 
+#' @return a single data frame
+#' @export
+#' 
+fct_tabulate_form <- function(xlsformpath,
+                          label_language = NULL,
+                          logic = TRUE) {
+
+  
+  # Additional Test
+  # xlsformpath <- "inst/RMS_CAPI_v2_en_es_fr.xlsx"
+  # label_language <- "Espa\u00f1ol (es)"
+  # label_language <- "Fran\u00e7ais (fr)"
+  # label_language <- "English (en)" 
+  
+  survey <- readxl::read_excel(xlsformpath, sheet = "survey")
+  
+  choices <- readxl::read_excel(xlsformpath, sheet = "choices") 
+  
+  settings <- readxl::read_excel(xlsformpath,  sheet = "settings")
+  
+ 
+  
+  ## Check if a default language is set up in the settings - and add the correct 
+  # separator for test settings$default_language <- NULL
+  label_language <- ifelse( is.null(label_language),
+                                      ifelse( is.null(settings$default_language), 
+                                             label_language, 
+                                             paste0("::",settings$default_language)),
+                                     paste0("::",label_language))
+  #label_language 
+  
+  modalities <- choices |>
+      ## Rename and use what ever label set is coming first 
+      dplyr::rename(labelmod = ifelse( is.null(label_language),
+                                       dplyr::first(tidyselect::starts_with("label")), 
+                                       paste0("label",label_language))  ,
+                    namemod = name)  |>
+      dplyr::filter( !(is.na(list_name)))  |> 
+      dplyr::mutate(labelnamemod = paste0("-[",namemod,"] ",labelmod))  |>
+    ## Calculate number modalities per list_name - if more than 8 - then we assume that
+    ## those modalities will not be read by the enumerator and not be accounted 
+    # for the interview duration estimation
+     
+                        dplyr::select(list_name, labelnamemod)|> 
+                        dplyr::group_by(list_name) |> 
+                        dplyr::mutate(new_list = paste(labelnamemod, 
+                                                collapse="\n")) |> 
+                        dplyr::group_by(list_name) |>
+                      ## remove defacto dpuplicate..
+                        dplyr::mutate(id = dplyr::row_number()) |>
+                        dplyr::mutate(new_list  = ifelse(test = id == 1,
+                                                  yes  = new_list,
+                                                  no   = NA)) |>
+                        dplyr::filter(!is.na(new_list)) |> 
+                        dplyr::select(list_name, new_list) |>
+                        dplyr::ungroup() |>
+    ## if the list of modalities is super long - trim it for better printing...
+    dplyr::mutate( new_list =  ifelse(test = nchar(new_list) >= 500,
+                                        yes  = paste0(substr(new_list,1,500),
+                                                      " \n ---- AND SO ON - long list... "),
+                                        no   = new_list) )
+  
+  variables_temp  <-  survey  |>
+      dplyr::filter( !(is.na(type)))|>
+      ## Rename and use what ever label set is coming first 
+      dplyr::rename(label = ifelse( is.null(label_language),  
+                                    dplyr::first(tidyselect::starts_with("label")),
+                                    paste0("label",label_language)),
+                    hint =  ifelse( is.null(label_language),
+                                    dplyr::first(tidyselect::starts_with("hint")),
+                                    paste0("hint",label_language)) ,
+                    constraint_message =  dplyr::first(
+                      tidyselect::starts_with("constraint_message"))
+                   # constraint_message = ifelse( is.null(label_language),
+                   #dplyr::first(tidyselect::starts_with("constraint_message")), 
+                   # paste0("constraint_message",label_language))
+                    ) |>
+      # Clean the begin and end in case the _ would be missing...
+      dplyr::mutate(type = dplyr::recode(type, 
+                                          "begin group" = "begin_group" ,
+                                          "end group"   ="end_group",
+                                         "begin repeat" = "begin_repeat" ,
+                                         "end repeat"   ="end_repeat")) |>
+      
+      ## spearate the type
+      tidyr::separate(type, 
+                          into = c("type", "list_name"), 
+                          sep = " ",
+                          fill = "right")   |>
+      
+      # dplyr::mutate(name_type = glue::glue('{name} \n *(type: {type})')) |>
+      # dplyr::mutate(label_hint = glue::glue('{label} \n *(hint: {hint})')) |>
+      #dplyr::mutate(name_type = paste0(name, "\n *(type: ",type, ")")) |>
+    
+      # stripping all the HTML code
+      dplyr::mutate(label  = gsub("#", "", label)) |>
+      dplyr::mutate(label  = gsub("@", "[at]", label)) |>
+      dplyr::mutate(label  = gsub("<(.|\n)*?>", "", label)) |>
+      dplyr::mutate(label  = gsub("\\*", "", label)) |>
+    
+      ## Adding hint with label
+      dplyr::mutate(label_hint = paste0( 
+                                  #ifelse(is.na(label), "no label", label),
+                                  ifelse(is.na(label), "", label),
+                                  ifelse(is.na(hint), "", 
+                                                 paste0("\n *(hint: ", hint, ")") 
+                                                 ) )) |>
+    
+    
+    ## Make the relevant expression more legible
+      ## Case relevant if not null...
+      dplyr::mutate(relevant = stringr::str_replace_all( relevant,
+                                                         pattern = "\'\'",
+                                                         replacement = "NULL")) |>
+      dplyr::mutate(relevant = stringr::str_replace_all( relevant,
+                                                         pattern = "!=",
+                                                         replacement = " is not ")) |>
+      dplyr::mutate(relevant = ifelse(is.na(relevant), 
+                                       relevant, 
+                                       paste0(name, " is relevant if ", stringr::str_replace_all( relevant,
+                                                        # pattern = c( "(", "\\$", "{", "}", ")" ),
+                                                        pattern = "[^[:alnum:][:blank:]+?><=_&/\\-]",
+                                                         replacement = "")) )) |>
+    
+    ## Make the constraint expression more legible
+     # dplyr::mutate(instruct = glue::glue('{relevant} \n *(constraint: {constraint_message})')) |>
+      dplyr::mutate(instruct = paste0( 
+                                  ifelse(is.na(relevant), "", relevant),
+                                  ifelse(is.na(constraint_message), "", 
+                                                 paste0("\n Constraint on ", name,": ", constraint_message, ")") 
+                                                 ) )) |>
+      
+    ## Need to add more cleaning in case...
+      dplyr::filter(!(is.na(type))) |>
+      dplyr::filter(type != "calculate") |>  
+      dplyr::select(name, type ,label_hint,  instruct, list_name )
+  
+variables <- variables_temp   |>
+    
+    ## Now merge with modalities
+      dplyr::left_join(modalities |>  
+                      dplyr::select(list_name, new_list ),
+                      by = c("list_name")) |>
+      ## Add the type in the new list
+      dplyr::mutate( new_list = ifelse(test = is.na(new_list),
+                      yes  = paste0( "( type: ", type,")"  ),
+                      no   =  paste0( "( type: ", type,") \n", new_list  ) )) |>
+      dplyr::select(label_hint, new_list, name ,  instruct) |>
+      #dplyr::distinct() |>
+      ## Rename and use what ever label set is coming first 
+      dplyr::rename( Questions = label_hint,
+                     Choices = new_list,
+                     Variables =  name,
+                     Logic =  instruct)
+    
+    return(variables)
+    
+}
+ 
+
+```
+
+```{r examples-fct_tabulate_form}
+# fct_tabulate_form()
+
+prettyform <- fct_tabulate_form( xlsformpath = system.file("demo.xlsx", 
+                                              package = "XlsFormUtil") )
+
+knitr::kable(utils::head(prettyform, 10))
+
+```
+
+```{r tests-fct_tabulate_form}
+# test_that("skeleton works", {
+# 
+# })
+```
+
+
+
+# fct_create_flextable
+
+```{r function-fct_create_flextable}
+#' @title Generate a flextable from the pretty printed version of the xlsform
+#' 
+#' @description Note that better legibility, it is advised to put the select 
+#' question with many possible answers - typically something like 
+#' "what is your country of origin?" -  as 'select_from_file'
+#'
+#' @param xlsformpath path to the file with xlsform
+#' 
+#' @param label_language Language to be used in case you have more than one. 
+#' If not specified, the 'default_language' in the 'settings' worksheet is used.
+#'  If that is not specified and more than one language is in the XlsForm, 
+#'  the language that comes first within column order will be used.
+#'  
+#'  
+#' @param logic TRUE per default put to FALSE to take out the printing of 
+#'              constraints.
+#' 
+#' @importFrom flextable flextable colformat_double 
+#'              set_table_properties border_remove border_outer
+#'              border_inner_h border_inner_v merge_v
+#'              bg merge_at set_flextable_defaults bold
+#' @importFrom officer fp_border
+#' @importFrom dplyr mutate filter select pull row_number
+#' @importFrom stringr str_detect 
+#' 
+#' @return a flextable ready to be printed in an Rmd template for word - 
+#'          using officedown.
+#' @export
+#'
+fct_create_flextable <- function(xlsformpath,
+                                 label_language,
+                                 logic) {
+  
+
+    variables <- fct_tabulate_form(xlsformpath, label_language )
+    
+    # flextable::set_flextable_defaults(font.family  = "Calibri",
+    #                    border.color = "black",  
+    #                    font.size    = 9, 
+    #                    theme_fun    = "theme_vanilla"#,
+    #                    #big.mark     = ",", 
+    #                    #table.layout = "autofit"
+    #                    )
+  
+  
+      # create a flex table
+    ft <- flextable::flextable(variables) 
+    
+    #ft <- flextable::width(ft, j = ~ Questions + Choices, width =  6)
+   #  ft <- flextable::width(ft, j = ~ Variables + Logic, width =  0.5)
+   # flextable::ncol_keys(ft)
+    
+
+ 
+
+   # ft <- flextable::width(ft, j = 1:4, width = c(3,3,1, 1)) 
+    
+    # ft <- flextable::set_table_properties(ft, layout = "autofit")
+    
+    #   ## Add theme
+    ft <- flextable::colformat_double(ft, big.mark = "\'", decimal.mark = ",", digits = 1)
+      
+      
+    ft <- flextable::border_remove(ft)
+      
+    std_border <- officer::fp_border(width = 1, color = "grey")
+      
+    ft <- flextable::border_outer(ft , 
+                        part="all", 
+                        border = std_border )
+    ft <- flextable::border_inner_h(ft, 
+                          part="all", 
+                          border = std_border)
+    ft <- flextable::border_inner_v(ft, 
+                          part="all", 
+                          border = std_border)
+    
+    #  need to merge cells based on rules
+    ##  vertical merging of similar values to address merging with modalities when it's the case
+    #ft <- flextable::merge_v(ft, j = c("name_type", "label_hint",  "instruct" ))
+    
+    ## horizontal merging in case of beging_group - end_group - begin_repeat, end_repeat
+    
+    # ft <- merge_at(ft, 
+    #                  j = 2:4, 
+    #                  i = 3 ,
+    #                  part = "body")
+    
+    ## identify the line with group
+    lines_begin_group <- variables |>
+      dplyr::mutate( rows = dplyr::row_number()) |>
+      dplyr::filter( stringr::str_detect(Choices, "begin_group" ) ) |>
+      dplyr::select(rows) |>
+      dplyr::pull()
+    
+    for (lines in lines_begin_group) {
+      # lines <-  lines_begin_group[1]
+      # ft <- flextable::merge_at(ft, 
+      #                i = lines, 
+      #                j = 2:4, 
+      #                part = "body")
+      ## Put colors for the beging group color
+      ft <- flextable::bg(ft, 
+               bg = "#ffa630",
+               i =  lines,
+               part = "body")
+      
+      ft <- flextable::bold(ft, i =  lines, part = "body")
+    }
+    
+    lines_end_group <- variables |>
+      dplyr::mutate( rows = dplyr::row_number()) |>
+      dplyr::filter( stringr::str_detect(Choices, "end_group") ) |>
+      dplyr::select(rows) |>
+      dplyr::pull()
+    
+    for (lines in lines_end_group) {
+      # ft <- flextable::merge_at(ft,
+      #                i = lines,
+      #                j = 2:4,
+      #                part = "body")
+      ft <- flextable::bg(ft, 
+               bg = "#ffa630",
+               i =  lines,
+               part = "body")
+    }
+    
+    
+    # with repeat
+    lines_begin_repeat <- variables |>
+      dplyr::mutate( rows = dplyr::row_number()) |>
+      dplyr::filter( stringr::str_detect(Choices, "begin_repeat") ) |>
+      dplyr::select(rows) |>
+      dplyr::pull()
+    
+    for (lines in lines_begin_repeat) {
+      # ft <- flextable::merge_at(ft,
+      #                i = lines,
+      #                j = 2:4,
+      #                part = "body")
+      ft <- flextable::bg(ft, 
+               bg = "#00a7e1",
+               i =  lines,
+               part = "body")
+      
+       ft <- flextable::bold(ft, i =  lines, part = "body")
+    }
+    
+    lines_end_repeat <- variables |>
+      dplyr::mutate( rows = dplyr::row_number()) |>
+      dplyr::filter( stringr::str_detect(Choices, "end_repeat") ) |>
+      dplyr::select(rows) |>
+      dplyr::pull()
+    
+    for (lines in lines_end_repeat) {
+      # ft <- flextable::merge_at(ft,
+      #                i = lines,
+      #                j = 2:4,
+      #                part = "body")
+      ft <- flextable::bg(ft, 
+               bg = "#00a7e1",
+               i =  lines,
+               part = "body")
+    }
+    
+    ## with note
+    lines_note <- variables |>
+      dplyr::mutate( rows = dplyr::row_number()) |>
+      dplyr::filter( stringr::str_detect(Choices, "note" ) ) |>
+      dplyr::select(rows) |>
+      dplyr::pull()
+    
+    for (lines in lines_note) {
+      # ft <- flextable::merge_at(ft, 
+      #                i = lines, 
+      #                j = 2:4, 
+      #                part = "body")
+      ft <- flextable::bg(ft, 
+               bg = "#ebebeb",
+               i =  lines,
+               part = "body")
+    }
+    
+    # ## with date
+    # lines_date <- variables |>
+    #   dplyr::mutate( rows = dplyr::row_number()) |>
+    #   dplyr::filter( stringr::str_detect(Choices, "date" ) ) |>
+    #   dplyr::select(rows) |>
+    #   dplyr::pull()
+    # 
+    # for (lines in lines_date) {
+    #   ft <- flextable::merge_at(ft, 
+    #                  i = lines, 
+    #                  j = 3:4, 
+    #                  part = "body")
+    # }
+    # 
+    # ## with integer
+    # lines_integer <- variables |>
+    #   dplyr::mutate( rows = dplyr::row_number()) |>
+    #   dplyr::filter( stringr::str_detect(name_type, "integer" ) ) |>
+    #   dplyr::select(rows) |>
+    #   dplyr::pull()
+    # 
+    # for (lines in lines_integer) {
+    #   ft <- flextable::merge_at(ft, 
+    #                  i = lines, 
+    #                  j = 3:4, 
+    #                  part = "body")
+    # }
+    # 
+    # ## with numeric
+    # lines_numeric <- variables |>
+    #   dplyr::mutate( rows = dplyr::row_number()) |>
+    #   dplyr::filter( stringr::str_detect(name_type, "numeric" ) ) |>
+    #   dplyr::select(rows) |>
+    #   dplyr::pull()
+    # 
+    # for (lines in lines_numeric) {
+    #   ft <- flextable::merge_at(ft, 
+    #                  i = lines, 
+    #                  j = 3:4, 
+    #                  part = "body")
+    # }
+    # 
+    # ## with numeric
+    # lines_text <- variables |>
+    #   dplyr::mutate( rows = dplyr::row_number()) |>
+    #   dplyr::filter( stringr::str_detect(name_type, "text" ) ) |>
+    #   dplyr::select(rows) |>
+    #   dplyr::pull()
+    # 
+    # for (lines in lines_text) {
+    #   ft <- flextable::merge_at(ft, 
+    #                  i = lines, 
+    #                  j = 3:4, 
+    #                  part = "body")
+    # }
+    
+    ## Adding top headers
+    # ft <- add_header_row(ft,  colwidths = c(2, 2, 1), 
+    #                      values = c("Questions", "Responses", "Check") )
+    
+    
+    ## Arrange width proportion.. with a total width of 9
+    ft <- ft |>
+            flextable::width(j = 1, width = 4) |>
+            flextable::width(j = 2, width = 2)|>
+            flextable::width(j = 3, width = 1) |>
+            flextable::width(j = 4, width = 2)    
+    
+    # et voila! 
+    return(ft)
+}
+ 
+
+```
+
+```{r examples-fct_create_flextable}
+fct_create_flextable(
+  xlsformpath = system.file("demo.xlsx", package = "XlsFormUtil"),
+  label_language = NULL )
+```
+
+```{r tests-fct_create_flextable}
+# test_that("skeleton works", {
+# 
+# })
+```
+
+
+
+# fct_render_prettyprint
+    
+```{r function-fct_render_prettyprint}
+#' Render Word version of an xlsform
+#' 
+#' Us the built in template and functions from the package to generate a word 
+#' version of the xlsform
+#' 
+#' #' When customizing and adjusting a household survey questionnaire during the 
+#' design phase, it's often necessary to have one testing version 
+#' (i.e. encoded in [xlsform](http://xlsform)) and a more legible version in word
+#'  that can be then shared with non-technical experts for them to comment and review.
+#'  
+#'  Moving between a paper version and an encoded-machine ready version is not 
+#'  smooth. Instead of having the master version in word and updating once while 
+#'  the xlsform, it's more convenient to generate a word output to collect 
+#'  feedback in word tracking mode.
+#'  
+#'  The default _prettyprinting_ template brings in a single grid different parts of the xlsform. The _prettyprinting_ can be done separately for each different language in case the `xlsform` includes more than one. The template increases legibility for both __question blocks__:
+#'  
+#'    1. begin_group --> depending on the level are output with a different style of heading level
+#'    2. begin_repeat --> displayed as a header but with a specific distinct color and note
+#'  
+#'  and within each block, each __question details__ is  included:  
+#'  
+#'    1. question code & type
+#'    2. question label & hint
+#'    3. if select_one or select_multiple, modalities code and label as a nested table
+#'    4. if present - question constraint with warning message as well as related question skip logic
+#' 
+#' 
+#' @param dir directory where the xlsform is located
+#' 
+#' @param xlsformfile name of the file for the xlsform
+#' 
+#' @param label_language language to sue to generate the pretty print -
+#'        for instance _"Español (es)"_, _"Français (fr)"_ or _"English (en)"_ .
+#'         If not specified, the 'default_language' in the 'settings' worksheet 
+#'         is used. If that is not specified and more than one language is in
+#'          the XlsForm, the language that comes first within column order will
+#'           be used. 
+#'           
+#'           
+#' @param wpm  word per minute - an average 180 word per minute (per default) 
+#' required to read loudly the text
+#' @param maxmodalities if more than 7 potential answers for a select question 
+#' (per default)- then we assume that those modalities will not be read by the
+#'  enumerator - but rather selected based on an open answer - and not be 
+#'  accounted for the modalities duration estimation
+#' @param resptimeclose  an average 4 seconds (per default) for respondent
+#'  to reply for closed questions
+#' @param resptimecondopen an average of  7 seconds (per default) to reply 
+#' to conditional text question (accounting for question type of 
+#' "other, please specify"). 
+#' @param resptimeopen an average of  10 seconds (per default) to reply 
+#' to open text question. 
+#' @param avrgrepeat In case of repeat questions, an average 3 repeat 
+#' (per default) is accounted for. 
+#' 
+#' @return a word document
+#' 
+#' @export
+fct_render_prettyprint <- function(  dir,
+                                 xlsformfile,
+                                 label_language  = NULL,
+  # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
+  wpm  = 180, 
+# maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation
+  maxmodalities = 7 , 
+# resptimeclose  an average 4 seconds (per default) for respondent to reply for closed questions
+  resptimeclose  = 4,
+# resptimecondopen an average of  7 seconds (per default) to reply to conditional text question (accounting for question type of "other, please specify"). 
+  resptimecondopen = 7,
+# resptimeopen an average of  10 seconds (per default) to reply to open text question. 
+  resptimeopen = 10,
+# avrgrepeat In case of repeat questions, an average 3 repeat (per default) is accounted for. 
+  avrgrepeat = 3 ){
+  
+   rmarkdown::render(
+    system.file("rmarkdown/templates/xlsform2word/skeleton/skeleton.Rmd", package = "XlsFormUtil"),
+    output_file = here::here(dir, paste0('Pretty-', substr(xlsformfile,1, nchar(xlsformfile) -5) , '.docx') ),
+    params = list( dir = dir,
+                   xlsformfile =  xlsformfile, 
+                  label_language = label_language,
+  # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
+                  wpm  = 180, 
+# maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation
+                 maxmodalities = 7 , 
+# resptimeclose  an average 4 seconds (per default) for respondent to reply for closed questions
+                 resptimeclose  = 4,
+# resptimecondopen an average of  7 seconds (per default) to reply to conditional text question (accounting for question type of "other, please specify"). 
+                resptimecondopen = 7,
+# resptimeopen an average of  10 seconds (per default) to reply to open text question. 
+               resptimeopen = 10,
+# avrgrepeat In case of repeat questions, an average 3 repeat (per default) is accounted for. 
+               avrgrepeat = 3 )
+)
+    
+}
+```
+  
+```{r example-fct_render_prettyprint}
+# fct_render_prettyprint( dir =  system.file("", package = "XlsFormUtil"),
+#   xlsformfile = "demo.xlsx",
+#   label_language = NULL )
+```
+  
+```{r tests-fct_render_prettyprint}
+# test_that("fct_render_prettyprint works", {
+#   expect_true(inherits(fct_render_prettyprint, "function")) 
+# })
+```
+  
+
+
+
+
+<!--
+ below is a default chunk to create and document your run_app function
+-->
+
+# run_app
+
+
+<!--
+Create a chunk for the core of the function
+
+- The chunk needs to be named `function` at least
+- It contains the code of a documented function
+- The chunk can also be named `function-my_function` to make it easily
+findable in your Rmd
+- Let the `@examples` part empty, and use the next `examples` chunk instead to present reproducible examples
+
+After inflating the template
+
+-  This function code will automatically be added in a new file in the "R/" directory
+-->
+    
+```{r function-run_app}
+#' Run the Shiny Application
+#' 
+#' 
+#' @param onStart A function that will be called before the app is actually run.
+#' This is only needed for \code{shinyAppObj}, since in the \code{shinyAppDir}
+#' case, a \code{global.R} file can be used for this purpose.
+
+#' @param options Named options that should be passed to the \code{runApp} call
+#' (these can be any of the following: "port", "launch.browser", "host", "quiet",
+#' "display.mode" and "test.mode"). You can also specify \code{width} and
+#' \code{height} parameters which provide a hint to the embedding environment
+#' about the ideal height/width for the app.
+
+#' @param enableBookmarking Can be one of \code{"url"}, \code{"server"}, or
+#' \code{"disable"}. The default value, \code{NULL}, will respect the setting from
+#' any previous calls to  \code{\link[shiny:enableBookmarking]{enableBookmarking()}}. See 
+#' #' \code{\link[shiny:enableBookmarking]{enableBookmarking()}}
+#' for more information on bookmarking your app.
+
+#' @param uiPattern A regular expression that will be applied to each \code{GET}
+#' request to determine whether the \code{ui} should be used to handle the
+#' request. Note that the entire request path must match the regular
+#' expression in order for the match to be considered successful.
+#' 
+#' 
+#' @param ... arguments to pass to golem_opts.
+#' See `?golem::get_golem_options` for more details.
+#'
+#' @importFrom shiny shinyApp
+#' @importFrom golem with_golem_options
+#' 
+#' @return a shiny app
+#' 
+#' @export
+
+run_app <- function(
+    onStart = NULL,
+    options = list(),
+    enableBookmarking = NULL,
+    uiPattern = "/",
+    ...
+) {
+  with_golem_options(
+    app = shinyApp(
+      ui = app_ui,
+      server = app_server,
+      onStart = onStart,
+      options = options,
+      enableBookmarking = enableBookmarking,
+      uiPattern = uiPattern
+    ),
+    golem_opts = list(...)
+  )
+}
+
+```
+
+<!--
+Create a chunk with an example of use for your function
+
+- The chunk needs to be named `examples` at least
+- It contains working examples of your function
+- The chunk is better be named `examples-my_median` to be handled
+correctly when inflated as a vignette
+
+After inflating the template
+
+-  This example will automatically be added in the '@examples' part of our function above in the "R/" directory
+- This example will automatically be added in the vignette created from this Rmd template
+-->
+
+```{r example-run_app}
+# run_app()
+```
+
+<!--
+Create a chunk with a test of use for your function
+
+- The chunk needs to be named `tests` at least
+- It contains working tests of your function
+- The chunk is better be named `tests-my_median` to be handled
+correctly when inflated as a vignette
+
+After inflating the template
+
+-  This test code will automatically be added in the "tests/testthat/" directory
+-->
+ 
+```{r tests-run_app}
+# test_that("run_app works", {
+#   expect_true(inherits(run_app, "function")) 
+# })
+```
+  
+
+
+
+<!--
+ Once you have created your back office functions , run the next chunk to install and package them
+
+# There can be development actions
+
+Create a chunk with 'development' actions
+
+- The chunk needs to be named `development` or `dev`
+- It contains functions that are used for package development only
+- Note that you may want to store most of these functions in the 0-dev_history.Rmd file
+
+These are only included in the present flat template file, their content will not be part of the package anywhere else.
+-->
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/function_documentation.Rmd", vignette_name = "Development")
+```
+
