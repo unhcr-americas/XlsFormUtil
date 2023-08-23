@@ -20,11 +20,10 @@ mod_home_ui <- function(id) {
 		  ),
 		  br(),
 		  ### Then a short explainer
-		  p(paste("This app brings additional functions when 
-		          designing questionnaire as XlsForm: 
+		  p("This app brings additional capacities when designing XlsForm questionnaires: 
 		          1.) Estimation of Duration to avoid long interview;  
 		          2.) Pretty Print in Word to faciliate peers comments; 
-		          3.) systematic comparison between a contextualised version and the original template."),
+		          3.) systematic comparison between a contextualised version and the original template.",
 		    style = "font-size: 20px"),
 		  br(),
 		  br(),

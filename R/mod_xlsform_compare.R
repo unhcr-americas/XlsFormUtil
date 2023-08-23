@@ -14,23 +14,27 @@ mod_xlsform_compare_ui <- function(id) {
 	tabItem(
 		tabName = "xlsform_compare",
 		fluidRow(
+		  column(
+		    width = 12,
 			h2("Compare xlsform with original template"),
 			p("The export from this function will help you to in order to quickly flag
 			  differences between your local contextualisation and the global template."),
 			br(),
 			p("Going through this steps is crucial as it will help to prevent missing out
-			  important variables,
-			  that will be required later at the data analysis stage by the ",
+			  important variables, that will be required later at the data analysis stage by the ",
 			  tags$a(href="https://rstudio.unhcr.org/RBM-indicators/",
 			         "Indicator Calculation Automation Scripts. "),
 			  br(),
 			  "A common issue for instance is messing the encoding of choices variable
 			  name that are actually encoded through numbers",
-			  "Note that comparison is done only for one defied selected language")
-		),
+			br(),
+			"Note that the comparison is performed only for one defined language")
+		  )
+		) ,
+		fluidRow(
 
 		shinydashboard::box(
-		  title = "Get Comparison",
+		  title = "Set up Comparison",
 		  #  status = "primary",
 		  status = "info",
 		  solidHeader = FALSE,
@@ -50,14 +54,10 @@ mod_xlsform_compare_ui <- function(id) {
 		      width = 6,
 		      downloadButton(outputId = ns("compare"),
     		              label = "Export an excel with a complete comparison",
-    		              width =  "200px",
-    		              style = "visibility: hidden;"),
-		      actionButton( inputId =  ns("prettyprintact"),
-		                    label = "Export an excel with a complete comparison",
-		                    class = "btn-success" ,
-		                    icon = shiny::icon("share-from-square"))
+    		              width =  "200px")
 		    )
 		  )
+		)
 		)
 	)
 }

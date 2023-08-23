@@ -36,7 +36,7 @@ suppressWarnings(suppressPackageStartupMessages({
   library(officedown)
   library(officer)
   library(flextable)
-  #library(XlsFormUtil)
+  library(XlsFormUtil)
   library(stringr)}
   ))
 
@@ -52,6 +52,8 @@ This document was automatically generated from the encoded version of the questi
  
 
 ```{r single-bar, echo=FALSE, message=FALSE, warning=FALSE   }
+if( duration == TRUE) {
+
 p <- fct_interview_duration(xlsformpath, 
                                        params$label_language,
   # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
@@ -68,12 +70,17 @@ p <- fct_interview_duration(xlsformpath,
   avrgrepeat = as.integer(params$avrgrepeat) )
 
 p[["plot"]]
+
+  
+}
 ```
 
 # Content
 
 ```{r echo=FALSE, results = 'asis'}
-fct_create_flextable(xlsformpath,  params$label_language)
+fct_create_flextable(xlsformpath = xlsformpath, 
+                     label_language = params$label_language,
+                     logic = params$logic)
 ```
 
 

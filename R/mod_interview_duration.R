@@ -114,6 +114,27 @@ mod_interview_duration_ui <- function(id) {
 mod_interview_duration_server <- function(input, output, session, AppReactiveValue) {
 	ns <- session$ns
 	
+	
+	
+	observeEvent(input$wpm, {
+	  AppReactiveValue$wpm <- input$wpm
+	})
+	
+	observeEvent(input$maxmodalities, {
+	  AppReactiveValue$maxmodalities <- input$maxmodalities
+	})
+	
+	observeEvent(input$resptimeclose, {
+	  AppReactiveValue$resptimeclose <- input$resptimeclose
+	})
+	
+	observeEvent(input$resptimecondopen, {
+	  AppReactiveValue$resptimecondopen <- input$resptimecondopen
+	})
+	
+	observeEvent(input$avrgrepeat, {
+	  AppReactiveValue$avrgrepeat <- input$avrgrepeat
+	})
 
 	output$plot <- renderPlot({
 	  

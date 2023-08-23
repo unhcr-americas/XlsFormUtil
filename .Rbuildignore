@@ -8,3 +8,4 @@
 ^dev$
 ^rsconnect$
 ^XlsFormUtil\.Rproj$
+^manifest\.json$

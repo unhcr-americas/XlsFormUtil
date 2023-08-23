@@ -6,8 +6,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of {XlsFormUtil} is to bring additional functions when
-designing questionnaire.
+The goal of {XlsFormUtil} is to bring additional capacities when
+designing XlsForm questionnaires.
 
 Currently this includes:
 
@@ -20,6 +20,9 @@ Currently this includes:
   ensure that all key variables required for indicator calculation are
   correctly included.
 
+The packages is also available as a shinyApp @
+<https://rstudio.unhcr.org/XlsFormUtil/>
+
 ## Installation
 
 You can install the development version of XlsFormUtil from
@@ -29,6 +32,8 @@ You can install the development version of XlsFormUtil from
 # install.packages("devtools")
 devtools::install_github("unhcr-americas/XlsFormUtil")
 ```
+
+For developers, look fork the repository and look at the dev folder.
 
 ## Example
 

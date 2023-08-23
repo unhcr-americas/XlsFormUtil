@@ -20,7 +20,13 @@ mod_upload_form_ui <- function(id) {
 		    h2('Your XlsForm'),
 		    p("You are reaching this app because, you have already a valid xlsform."),
 		    p("Note that the app doe not include any xlsform validation capacity"),
-		    p("Use existing xlsform validator before.")
+		    p("Use Kobotoolbox builtin xlsform validator before, or alternatives such as ",
+		      tags$a(href="https://opendatakit.org/xlsform/",
+		             "ODK validator"), 
+		      ". You may also check some ",
+		      tags$a(href="https://unhcr.github.io/Integrated-framework-household-survey/Configure-forms.html",
+		             "Tips here. ") ),
+		      br()
 		   )
 		),
 		fluidRow(

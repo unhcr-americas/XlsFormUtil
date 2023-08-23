@@ -14,28 +14,33 @@ mod_pretty_print_ui <- function(id) {
 	tabItem(
 		tabName = "pretty_print",
 		fluidRow(
-		  h2("Generate a Word version of your XlsForm"),
-		p("When customizing and adjusting a household survey questionnaire during
-		the design phase, it's often necessary to have one testing version
-		(i.e. encoded in xlsform) and a more legible version in word that can be
-		then shared with non-technical experts for them to comment and review."),
-
-		p("Moving between a paper version and an encoded-machine ready version is not smooth.
-		  Instead of having the master version in word and updating once while the
-		  xlsform, it's more convenient to generate a word output to collect feedback
-		  in word tracking mode."),
-		br(),
-
-		p("Note that for better legibility of the document, it is advised to encode the select
- question that comes with a very long list of possible answers - typically something like
- \"what is your country of origin?\" -  as",
-		  tags$a(href="https://xlsform.org/en/#multiple-choice-from-file",
-             "\'select_from_file\'") ),
-
-    p(""),
+		  column(
+		    width = 12,
+      		  h2("Generate a Word version of your XlsForm"),
+        		p("When customizing and adjusting a household survey questionnaire during
+        		the design phase, it's often necessary to have one testing version
+        		(i.e. encoded in xlsform) and a more legible version in word that can be
+        		then shared with non-technical experts for them to comment and review."),
+        
+        		p("Moving between a paper version and an encoded-machine ready version is not smooth.
+        		  Instead of having the master version in word and updating once while the
+        		  xlsform, it's more convenient to generate a word output to collect feedback
+        		  in word tracking mode."),
+        		br(),
+        
+        		p("Note that for better legibility of the document, it is advised to encode the select
+         question that comes with a very long list of possible answers - typically something like
+         \"what is your country of origin?\" -  as",
+        		  tags$a(href="https://xlsform.org/en/#multiple-choice-from-file",
+                     "\'select_from_file\'") ),
+        
+             p("")
+		  )
+		) ,
+		fluidRow(
 
 		shinydashboard::box(
-		  title = "Get Estimate",
+		  title = "Configure export",
 		  #  status = "primary",
 		  status = "info",
 		  solidHeader = FALSE,
@@ -47,7 +52,7 @@ mod_pretty_print_ui <- function(id) {
 		      width = 6,
 		     		checkboxInput(inputId = ns("logic"),
         		              label   = "Add info on skip logic and constraints?",
-        		              value   = TRUE),
+        		              value   = FALSE),
         		checkboxInput(inputId = ns("duration"),
         		              label   = "Insert the duration chart within export",
         		              value   = FALSE)
@@ -64,11 +69,9 @@ mod_pretty_print_ui <- function(id) {
       		  #               icon = shiny::icon("share-from-square")),
       		  #              style = "visibility: hidden;"
       		  
-      		  
-      		  
-      		    )
+      		)
+		   )
 		  )
-		)
 		)
 	)
 }
@@ -98,18 +101,20 @@ mod_pretty_print_server <- function(input, output, session, AppReactiveValue) {
 	    params = list( 
 	      xlsformfile = AppReactiveValue$xlsformpath,
 	      label_language = AppReactiveValue$language ,
+	      logic = input$logic,
+	      duration = input$duration,    
 	      # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
-	      wpm  = 180, 
+	      wpm  = AppReactiveValue$wpm, 
 	      # maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation
-	      maxmodalities = 7 , 
+	      maxmodalities =  AppReactiveValue$maxmodalities , 
 	      # resptimeclose  an average 4 seconds (per default) for respondent to reply for closed questions
-	      resptimeclose  = 4,
+	      resptimeclose  =  AppReactiveValue$resptimeclose,
 	      # resptimecondopen an average of  7 seconds (per default) to reply to conditional text question (accounting for question type of "other, please specify"). 
-	      resptimecondopen = 7,
+	      resptimecondopen =  AppReactiveValue$resptimecondopen ,
 	      # resptimeopen an average of  10 seconds (per default) to reply to open text question. 
-	      resptimeopen = 10,
+	      resptimeopen =  AppReactiveValue$resptimeopen ,
 	      # avrgrepeat In case of repeat questions, an average 3 repeat (per default) is accounted for. 
-	      avrgrepeat = 3 )
+	      avrgrepeat =  AppReactiveValue$avrgrepeat )
 	    
 	    
 	    id <- showNotification(

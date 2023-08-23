@@ -178,6 +178,11 @@ variables <- variables_temp   |>
                      Choices = new_list,
                      Variables =  name,
                      Logic =  instruct)
+
+    ## Simplify in case
+     if(logic == TRUE) 
+       { variables <- variables } else 
+       { variables <- variables |> dplyr::select(Questions, Choices, Variables)}
     
     return(variables)
     

@@ -13,8 +13,8 @@ sidebar <- function() {
       ## Here the menu item entry to the first module
       shinydashboard::menuItem("About",tabName = "home",icon = icon("bookmark")),
       
-      shinydashboard::menuItem("Upload XlsFrom",tabName = "upload_form",icon = icon("highlighter")),
-      shinydashboard::menuItem("Estimate Duration",tabName = "interview_duration",icon = icon("clock")),
+      shinydashboard::menuItem("Upload an XlsForm",tabName = "upload_form",icon = icon("highlighter")),
+      shinydashboard::menuItem("Estimate Interview Duration",tabName = "interview_duration",icon = icon("clock")),
       shinydashboard::menuItem("Generate Word Version",tabName = "pretty_print",icon = icon("print")),
       shinydashboard::menuItem("Compare with Base Form",tabName = "xlsform_compare",icon = icon("code-compare"))
       
