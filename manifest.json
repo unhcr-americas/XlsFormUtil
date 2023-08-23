@@ -255,28 +255,15 @@
         "Description": "Output nicely printed version of an xlsform This approach\nallows to develop a questionnaire and offer version for revision based\non an a master version maintained directly within the xlform format.",
         "License": "MIT + file LICENSE",
         "URL": "https://github.com/unhcr-americas/XlsFormUtil",
-        "Imports": "cli, config, dplyr, flextable, forcats, ggplot2, golem, here,\nofficer, openxlsx, purrr, readxl, rmarkdown, shiny,\nshinydashboard, stringr, tidyr, tidyselect, tidyverse,\nunhcrshiny, utils",
-        "Suggests": "knitr, spelling, testthat",
+        "Imports": "cli,\nconfig,\ndplyr,\nflextable,\nforcats,\nggplot2,\ngolem,\nhere,\nofficer,\nopenxlsx,\npurrr,\nreadxl,\nrmarkdown,\nshiny,\nshinydashboard,\nstringr,\ntidyr,\ntidyselect,\ntidyverse,\nunhcrshiny,\nutils",
+        "Suggests": "knitr,\nspelling,\ntestthat",
         "VignetteBuilder": "knitr",
         "Remotes": "edouard-legoupil/unhcrshiny",
         "Config/fusen/version": "0.5.2",
         "Encoding": "UTF-8",
         "Language": "en-US",
-        "RoxygenNote": "7.2.3.9000",
-        "RemoteType": "github",
-        "RemoteHost": "api.github.com",
-        "RemoteRepo": "XlsFormUtil",
-        "RemoteUsername": "unhcr-americas",
-        "RemoteRef": "HEAD",
-        "RemoteSha": "401c68c311354c4480c9619e2265d9b7bdc4923a",
-        "GithubRepo": "XlsFormUtil",
-        "GithubUsername": "unhcr-americas",
-        "GithubRef": "HEAD",
-        "GithubSHA1": "401c68c311354c4480c9619e2265d9b7bdc4923a",
-        "NeedsCompilation": "no",
-        "Packaged": "2023-08-23 18:57:54 UTC; edouard",
-        "Author": "Edouard Legoupil [aut, cre]",
-        "Built": "R 4.3.1; ; 2023-08-23 18:57:55 UTC; unix"
+        "LazyData": "true",
+        "RoxygenNote": "7.2.3.9000"
       }
     },
     "askpass": {
@@ -5621,7 +5608,7 @@
       "checksum": "a17e84afb47ce35a1e21a40a056d7547"
     },
     ".Rbuildignore": {
-      "checksum": "67a14b7face947cf279f91dc81bd3159"
+      "checksum": "10a22680c3a17b463a58997527d33310"
     },
     ".RData": {
       "checksum": "4b9ef9875315d9df7109c1d314a9341d"
@@ -5642,7 +5629,7 @@
       "checksum": "7adbb71f00fbd3822ccac2ca044bf0a6"
     },
     "dev/function_documentation.Rmd": {
-      "checksum": "baa60934a5dc8bf897b8258d14d1da7c"
+      "checksum": "a17d8521765ee6ff3f0118906869fc02"
     },
     "dev/githublink.R": {
       "checksum": "a6a6287587b0768a286e4466d24d584f"
@@ -5663,7 +5650,7 @@
       "checksum": "fb56f94a8d449952c71f7403d7d97afe"
     },
     "docs/articles/development.html": {
-      "checksum": "53a86917598daf95b6ad1ac0768aed6a"
+      "checksum": "33c4226dd43c5906ff651c391c75d0a2"
     },
     "docs/articles/index.html": {
       "checksum": "0501fa910eb5d7f14140401a05877a5a"
@@ -5717,7 +5704,7 @@
       "checksum": "939934ffc01a2bed928c47fbbf18d89a"
     },
     "docs/index.html": {
-      "checksum": "ac42b8b9b4609f64677799fb2fec2864"
+      "checksum": "ed9fbbb3b8b6c411d683de77880a80de"
     },
     "docs/LICENSE-text.html": {
       "checksum": "adc4abb2b1ebc227a97799d9ff221c55"
@@ -5732,16 +5719,16 @@
       "checksum": "9c627b6b2c41322b8f362fac07a2ae5a"
     },
     "docs/pkgdown.yml": {
-      "checksum": "c03763305487e5592f53466a8afd4106"
+      "checksum": "81377a9e7018775b3c9d3bab1c4c9845"
     },
     "docs/reference/fct_create_flextable.html": {
-      "checksum": "0eba08e9ab04a55c36754e19f2c519b2"
+      "checksum": "df6a29dae476858ced9fb5ae7aa5df9b"
     },
     "docs/reference/fct_interview_duration-1.png": {
       "checksum": "c90235f85f98612e583b2a1be9b52bdb"
     },
     "docs/reference/fct_interview_duration.html": {
-      "checksum": "378fd11e9c3da0287be89ea67c6905c9"
+      "checksum": "857d3bd3c9482c76d35af2691cbdea94"
     },
     "docs/reference/fct_render_prettyprint.html": {
       "checksum": "b0a9fb8fd5cfbb95eed7382d7dc40a7d"
@@ -5750,10 +5737,13 @@
       "checksum": "9f4efd77ca6211508c366d336c737616"
     },
     "docs/reference/fct_xlsform_compare.html": {
-      "checksum": "8f18ac0749b2233428e565ca252ded7a"
+      "checksum": "f939ba6d800bbdc0c99111c15acb82ee"
+    },
+    "docs/reference/fct_xlsfrom_language.html": {
+      "checksum": "bad37f98faa92b997ad60dd1a280137f"
     },
     "docs/reference/index.html": {
-      "checksum": "2abdd587758eff95328e3d25169e927f"
+      "checksum": "f13e7767755da01c4cc3f68748054ae1"
     },
     "docs/reference/libs/tabwid-1.1.3/tabwid.css": {
       "checksum": "d437ce2bfe7051efe499172acb799f29"
@@ -5768,10 +5758,10 @@
       "checksum": "0fc5b1586ff7b518aa95deed0618661a"
     },
     "docs/search.json": {
-      "checksum": "acb94d78d9c637f5ed6612187e77f6a8"
+      "checksum": "ea5ff93c510041900070744d430a2ee6"
     },
     "docs/sitemap.xml": {
-      "checksum": "06e6ecda74f18baabc75562063e9c28e"
+      "checksum": "0112c0215fe82f875fb40cde444f3d25"
     },
     "inst/app/www/favicon.ico": {
       "checksum": "ab69887a25a2509f47342dc51579a4ff"
@@ -5792,7 +5782,7 @@
       "checksum": "543a9ab50ca4709606c1154b8a99d836"
     },
     "inst/rmarkdown/templates/xlsform2word/skeleton/skeleton.Rmd": {
-      "checksum": "d748de9cdbf81f34cf7fd3207bdf188a"
+      "checksum": "fd127b9fa1e14dd04002d4ea8b012353"
     },
     "inst/rmarkdown/templates/xlsform2word/template.yaml": {
       "checksum": "aee011f81157b0b5ec5c623ba437efe8"
@@ -5855,7 +5845,7 @@
       "checksum": "ac38e4cd996cf67398b2326ca1f6b12f"
     },
     "R/fct_tabulate_form.R": {
-      "checksum": "b9a99714b54f458d8004fac8790d7bba"
+      "checksum": "344eb644b3e603722d5f8c0f2284d51f"
     },
     "R/fct_xlsform_compare.R": {
       "checksum": "f4f1e7b7c0bbbd81a55c07e2cac77cd0"
@@ -5864,37 +5854,37 @@
       "checksum": "3661968df32cb2092ad12c91c1588f99"
     },
     "R/globals.R": {
-      "checksum": "6eda19b3d0632ba3f42583b9f400c6e0"
+      "checksum": "6bf948bdaadde73c62f107d934f9e227"
     },
     "R/header.R": {
       "checksum": "a3e79657e383354faf550d9c97309257"
     },
     "R/mod_home.R": {
-      "checksum": "f7fc5229f2c28b72415174f1930cae3b"
+      "checksum": "f3c96307d81452d1ef0832b621400a9c"
     },
     "R/mod_interview_duration.R": {
-      "checksum": "ef51a9ce16faebf8e0addba29ce616a7"
+      "checksum": "a99f9f09395e103f1f1035e3873ad8e5"
     },
     "R/mod_pretty_print.R": {
-      "checksum": "8884b345aa5a3237eec37d0f1e30b378"
+      "checksum": "e933d55b1704bd030755a251bd93fc12"
     },
     "R/mod_upload_form.R": {
-      "checksum": "314374219ddcae289347e3277c8ef710"
+      "checksum": "2bab95cc7ac5b84be6c57d7fb52b7fb2"
     },
     "R/mod_xlsform_compare.R": {
-      "checksum": "13963e6322102909ce92f8d8fb6d65c8"
+      "checksum": "dbd4b6443250830b3c9e7673fc0bc050"
     },
     "R/run_app.R": {
       "checksum": "e9b2822f802a2fed9e5800d17fa8c855"
     },
     "R/sidebar.R": {
-      "checksum": "7da4dadacfc703cdf472a54c49b39d17"
+      "checksum": "31a7b2fce05f9bf4108ea763fac5aa89"
     },
     "README.md": {
-      "checksum": "d8738b7a75005c48ce46a42de9d2732b"
+      "checksum": "a0e33846d5e492db67d8f94e7b48f07f"
     },
     "README.Rmd": {
-      "checksum": "2160bfaa58e3bee0de69b0f2cb642b0c"
+      "checksum": "96eaa74cea4530e340f95cd5effaac5b"
     },
     "tests/spelling.R": {
       "checksum": "0622a97a2aaa3c342f09636052c2d7f5"
