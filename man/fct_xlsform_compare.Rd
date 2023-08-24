@@ -5,21 +5,19 @@
 \title{Generate a consolidated xlsform from a list of xlsform in order to 
 quickly flag differences}
 \usage{
-fct_xlsform_compare(listfile, folder, label_language, fileout = NULL)
+fct_xlsform_compare(listfile, label_language, fileout = NULL)
 }
 \arguments{
-\item{listfile}{list of  path to multiple xlsform files - ll assumed to be 
+\item{listfile}{list of full path to multiple xlsform files - ll assumed to be 
 in the same folder. The first one will be used as the master to compare the 
 other to}
-
-\item{folder}{where all the files are located}
 
 \item{label_language}{Language to be used in case you have more than one.
 If not specified, the 'default_language' in the 'settings' worksheet is used. 
 If that is not specified and more than one language is in the XlsForm, 
 the language that comes first within column order will be used.}
 
-\item{fileout}{if specified defined the name of the file to save the xlsform
+\item{fileout}{if specified defined the full path name of the file to save the xlsform
 _compare output}
 }
 \value{
@@ -30,10 +28,10 @@ Note that comparison is done for a selected language
 }
 \examples{
 
+## With 2 files
 check <- fct_xlsform_compare(
-          listfile = c( "demo.xlsx","demo_adapt1.xlsx","demo_adapt2.xlsx"),  
-          folder = stringr::str_sub(system.file("", package = "XlsFormUtil"), 
-                                    end = -1) ,                    
+          listfile = c( system.file("demo.xlsx", package = "XlsFormUtil"),
+                        system.file("demo_adapt1.xlsx", package = "XlsFormUtil") ), 
           label_language = NULL,
           fileout = NULL)
 
@@ -41,5 +39,13 @@ check <- fct_xlsform_compare(
 knitr::kable(utils::head(as.data.frame(check[1]), 10))
 # choicescompare
 knitr::kable(utils::head(as.data.frame(check[2]), 10, 10))
+
+## With 3 files
+check <- fct_xlsform_compare(
+          listfile = c( system.file("demo.xlsx", package = "XlsFormUtil"),
+                        system.file("demo_adapt1.xlsx", package = "XlsFormUtil"),
+                        system.file("demo_adapt2.xlsx", package = "XlsFormUtil") ), 
+          label_language = NULL,
+          fileout = NULL)
 
 }

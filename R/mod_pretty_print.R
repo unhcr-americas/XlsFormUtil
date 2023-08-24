@@ -53,8 +53,8 @@ mod_pretty_print_ui <- function(id) {
 		     		checkboxInput(inputId = ns("logic"),
         		              label   = "Add info on skip logic and constraints?",
         		              value   = FALSE),
-        		checkboxInput(inputId = ns("duration"),
-        		              label   = "Insert the duration chart within export",
+        		checkboxInput(inputId = ns("estimation"),
+        		              label   = "Insert the Interview duration chart within export?",
         		              value   = FALSE)
 		      ),
 
@@ -102,7 +102,7 @@ mod_pretty_print_server <- function(input, output, session, AppReactiveValue) {
 	      xlsformfile = AppReactiveValue$xlsformpath,
 	      label_language = AppReactiveValue$language ,
 	      logic = input$logic,
-	      duration = input$duration,    
+	      estimation = input$estimation,    
 	      # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
 	      wpm  = AppReactiveValue$wpm, 
 	      # maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation

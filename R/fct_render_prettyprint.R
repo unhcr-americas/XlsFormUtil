@@ -38,7 +38,10 @@
 #'         is used. If that is not specified and more than one language is in
 #'          the XlsForm, the language that comes first within column order will
 #'           be used. 
-#'           
+#' @param logic TRUE per default put to FALSE to take out the printing of 
+#'              constraints.    
+#'              
+#' @param estimation TRUE FALSE add an estimation of interview dration            
 #'           
 #' @param wpm  word per minute - an average 180 word per minute (per default) 
 #' required to read loudly the text
@@ -66,6 +69,8 @@
 fct_render_prettyprint <- function(  dir,
                                  xlsformfile,
                                  label_language  = NULL,
+                                 logic = TRUE,
+                                 estimation = TRUE,
   # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
   wpm  = 180, 
 # maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation

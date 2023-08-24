@@ -8,6 +8,8 @@ fct_render_prettyprint(
   dir,
   xlsformfile,
   label_language = NULL,
+  logic = TRUE,
+  estimation = TRUE,
   wpm = 180,
   maxmodalities = 7,
   resptimeclose = 4,
@@ -27,6 +29,11 @@ for instance _"Español (es)"_, _"Français (fr)"_ or _"English (en)"_ .
  is used. If that is not specified and more than one language is in
   the XlsForm, the language that comes first within column order will
    be used.}
+
+\item{logic}{TRUE per default put to FALSE to take out the printing of 
+constraints.}
+
+\item{estimation}{TRUE FALSE add an estimation of interview dration}
 
 \item{wpm}{word per minute - an average 180 word per minute (per default) 
 required to read loudly the text}

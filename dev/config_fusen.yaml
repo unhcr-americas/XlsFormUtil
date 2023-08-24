@@ -11,11 +11,11 @@ function_documentation.Rmd:
   - R/run_app.R
   tests:
   - tests/testthat/test-fct_xlsfrom_language.R
-  - tests/testthat/test-fct_xlsform_compare.R
   - tests/testthat/test-fct_interview_duration.R
   - tests/testthat/test-fct_tabulate_form.R
   - tests/testthat/test-fct_create_flextable.R
   - tests/testthat/test-fct_render_prettyprint.R
+  - tests/testthat/test-fct_xlsform_compare.R
   - tests/testthat/test-run_app.R
   vignettes: vignettes/development.Rmd
   inflate:

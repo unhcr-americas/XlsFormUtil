@@ -6,7 +6,7 @@ output:
 params:
   xlsformfile: "myxlsform.xlsx"
   label_language: "NULL"  
-  duration: TRUE  
+  estimation: TRUE  
   logic: TRUE  
   wpm: "180" # wpm  word per minute - an average 180 word per minute (per default) required to read loudly the text
   maxmodalities: "7" # maxmodalities if more than 7 potential answers for a select question (per default)- then we assume that those modalities will not be read by the enumerator - but rather selected based on an open answer - and not be accounted for the modalities duration estimation 
@@ -52,7 +52,7 @@ This document was automatically generated from the encoded version of the questi
  
 
 ```{r single-bar, echo=FALSE, message=FALSE, warning=FALSE   }
-if( duration == TRUE) {
+if( params$estimation == TRUE) {
 
 p <- fct_interview_duration(xlsformpath, 
                                        params$label_language,

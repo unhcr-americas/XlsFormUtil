@@ -55,25 +55,6 @@ fct_xlsfrom_language( xlsformpath = system.file("KoBoXLSFormExamples.xlsx",
 
   
 
-
-# fct_xlsform_compare
-
-```{r examples-fct_xlsform_compare}
-
-check <- fct_xlsform_compare(
-          listfile = c( "demo.xlsx","demo_adapt1.xlsx","demo_adapt2.xlsx"),  
-          folder = stringr::str_sub(system.file("", package = "XlsFormUtil"), 
-                                    end = -1) ,                    
-          label_language = NULL,
-          fileout = NULL)
-
-# variablescompare,
-knitr::kable(utils::head(as.data.frame(check[1]), 10))
-# choicescompare
-knitr::kable(utils::head(as.data.frame(check[2]), 10, 10))
-
-```
-
 # fct_interview_duration
 
 ```{r examples-fct_interview_duration, fig.width = 9}
@@ -148,6 +129,31 @@ fct_create_flextable(
 
 
 
+# fct_xlsform_compare
+
+```{r examples-fct_xlsform_compare}
+
+## With 2 files
+check <- fct_xlsform_compare(
+          listfile = c( system.file("demo.xlsx", package = "XlsFormUtil"),
+                        system.file("demo_adapt1.xlsx", package = "XlsFormUtil") ), 
+          label_language = NULL,
+          fileout = NULL)
+
+# variablescompare,
+knitr::kable(utils::head(as.data.frame(check[1]), 10))
+# choicescompare
+knitr::kable(utils::head(as.data.frame(check[2]), 10, 10))
+
+## With 3 files
+check <- fct_xlsform_compare(
+          listfile = c( system.file("demo.xlsx", package = "XlsFormUtil"),
+                        system.file("demo_adapt1.xlsx", package = "XlsFormUtil"),
+                        system.file("demo_adapt2.xlsx", package = "XlsFormUtil") ), 
+          label_language = NULL,
+          fileout = NULL)
+
+```
 
 <!--
  below is a default chunk to create and document your run_app function

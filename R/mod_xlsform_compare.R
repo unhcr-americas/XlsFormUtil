@@ -20,15 +20,17 @@ mod_xlsform_compare_ui <- function(id) {
 			p("The export from this function will help you to in order to quickly flag
 			  differences between your local contextualisation and the global template."),
 			br(),
-			p("Going through this steps is crucial as it will help to prevent missing out
-			  important variables, that will be required later at the data analysis stage by the ",
+			p("It is essential to follow these steps because they ensure that 
+			  important variables, needed later during the data analysis by the ",
 			  tags$a(href="https://rstudio.unhcr.org/RBM-indicators/",
-			         "Indicator Calculation Automation Scripts. "),
+			         "Indicator Calculation Automation Scripts"),
 			  br(),
-			  "A common issue for instance is messing the encoding of choices variable
-			  name that are actually encoded through numbers",
+			  ", are not overlooked. A frequent problem, for example, involves confusion 
+			  regarding the encoding of choice variable names, which are actually
+			  represented using numerical codes. ",
 			br(),
-			"Note that the comparison is performed only for one defined language")
+			"It's important to note that this comparison is carried out solely for a 
+			specific predefined language")
 		  )
 		) ,
 		fluidRow(
@@ -45,7 +47,7 @@ mod_xlsform_compare_ui <- function(id) {
 		    column(
 		      width = 6,
       		fileInput(
-      		  inputId =  "xlsformbase",
+      		  inputId =  ns("xlsformbase"),
       		  label = "Upload a valid xlsform to be used as comparison basis (.xlsx file)",
       		  accept = ".xlsx"  )
 		      ),
@@ -97,27 +99,35 @@ mod_xlsform_compare_server <- function(input, output, session, AppReactiveValue)
 	
 	
 	
-	output$prettyprint <- downloadHandler(
-	  # For PDF output, change this to "report.pdf"
-	  filename = "xlsform_comparion.xlsx",
-	  content = function(file) {
-	    
+	output$compare <- downloadHandler( 
+	  filename = function(){
+	    paste( 'xlsform_comparison',Sys.time(), '.xlsx')
+	  },
+	  content = function(file){
 	    fct_xlsform_compare(listfile = c(AppReactiveValue$xlsformbasepath, 
 	                                     AppReactiveValue$xlsformpath),
-	                        folder = tempdir() ,
-	                        label_language = AppReactiveValue$language,
-	                        fileout = NULL)
-	    
-	    id <- showNotification(
-	      "Rendering report...", 
-	      duration = NULL, 
-	      closeButton = FALSE
-	    )
-	    on.exit(removeNotification(id), add = TRUE)
-	    
-
-	  }
-	)
+	                         label_language = AppReactiveValue$language,
+	                         fileout = file)
+	                         }
+    	)
+	  
+	  
+	#   filename = "xlsform_comparion.xlsx",
+	#   content = function(file) {
+	#     tempReport <- file.path(tempdir(), "xlsform_comparion.xlsx")
+	#     fct_xlsform_compare(listfile = c(AppReactiveValue$xlsformbasepath, 
+	#                                      AppReactiveValue$xlsformpath),
+	#                         label_language = AppReactiveValue$language,
+	#                         fileout = file)
+	#     
+	#     id <- showNotification(
+	#       "Working on it...",
+	#       duration = NULL,
+	#       closeButton = FALSE
+	#     )
+	#     on.exit(removeNotification(id), add = TRUE)
+	#   }
+	# )
 	
 	
 

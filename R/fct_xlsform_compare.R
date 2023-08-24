@@ -5,18 +5,17 @@
 #' 
 #' @description Note that comparison is done for a selected language
 #'
-#' @param listfile list of  path to multiple xlsform files - ll assumed to be 
+#' @param listfile list of full path to multiple xlsform files - ll assumed to be 
 #' in the same folder. The first one will be used as the master to compare the 
 #' other to
 #' 
-#' @param folder where all the files are located
 #' 
 #' @param label_language Language to be used in case you have more than one.
 #'  If not specified, the 'default_language' in the 'settings' worksheet is used. 
 #'  If that is not specified and more than one language is in the XlsForm, 
 #'  the language that comes first within column order will be used.
 #' 
-#' @param fileout  if specified defined the name of the file to save the xlsform
+#' @param fileout  if specified defined the full path name of the file to save the xlsform
 #' _compare output
 #' 
 #' @importFrom readxl read_excel
@@ -27,6 +26,7 @@
 #' @importFrom readxl read_excel
 #' @importFrom forcats fct_reorder
 #' @importFrom tidyselect starts_with
+#' @importFrom fs path_file
 #' @importFrom tidyr separate
 #' @importFrom  openxlsx createWorkbook addWorksheet writeData 
 #'               setColWidths addStyle saveWorkbook
@@ -36,10 +36,10 @@
 #'
 #' @examples
 #'
+#' ## With 2 files
 #' check <- fct_xlsform_compare(
-#'           listfile = c( "demo.xlsx","demo_adapt1.xlsx","demo_adapt2.xlsx"),  
-#'           folder = stringr::str_sub(system.file("", package = "XlsFormUtil"), 
-#'                                     end = -1) ,                    
+#'           listfile = c( system.file("demo.xlsx", package = "XlsFormUtil"),
+#'                         system.file("demo_adapt1.xlsx", package = "XlsFormUtil") ), 
 #'           label_language = NULL,
 #'           fileout = NULL)
 #'
@@ -48,13 +48,22 @@
 #' # choicescompare
 #' knitr::kable(utils::head(as.data.frame(check[2]), 10, 10))
 #'
+#' ## With 3 files
+#' check <- fct_xlsform_compare(
+#'           listfile = c( system.file("demo.xlsx", package = "XlsFormUtil"),
+#'                         system.file("demo_adapt1.xlsx", package = "XlsFormUtil"),
+#'                         system.file("demo_adapt2.xlsx", package = "XlsFormUtil") ), 
+#'           label_language = NULL,
+#'           fileout = NULL)
+#'
 fct_xlsform_compare <- function( listfile,
-                             folder,
                              label_language,
                              fileout = NULL) {
   # library(XlsFormUtil)
-  formthis <- listfile[1]
-  xlsformpath = here::here(folder, formthis)
+  #xlsformpath = here::here(folder, formthis)
+   xlsformpath <- listfile[1]
+   formthis <-fs::path_file(xlsformpath) 
+   formthis <-  stringr::str_remove(formthis, ".xlsx")
 
   settings <- readxl::read_excel(xlsformpath,  sheet = "settings")
   #form_instance <- as.character(settings$form_title)
@@ -71,7 +80,8 @@ fct_xlsform_compare <- function( listfile,
   #### Choices master to... ######
   choicesmaster <- readxl::read_excel(xlsformpath, sheet = "choices") |>
     # dplyr::mutate(form_instance = form_instance)|>
-    dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+    dplyr::mutate(form_file =  formthis ) |>
+    #dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
     #  Rename and use what ever label set is coming first
     dplyr::rename(label = ifelse( is.null(label_language),
                                   dplyr::first(tidyselect::starts_with("label")),
@@ -98,8 +108,8 @@ fct_xlsform_compare <- function( listfile,
                                   paste0("hint",label_language))  ) |>
 
     #dplyr::mutate(form_instance = form_instance)|>
-    dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
-
+   # dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+    dplyr::mutate(form_file =  formthis ) |>
     # Clean the begin and end in case the _ would be missing...
     dplyr::mutate(type = dplyr::recode(type,
                                        "begin group" = "begin_group" ,
@@ -134,15 +144,18 @@ fct_xlsform_compare <- function( listfile,
   #### Now looping around the list of file to compare the master to... ######
   for ( i in 2:length(listfile ))  {
     # i <- 2
-    formthis <- listfile[i]
+    xlsformpath <- listfile[i]
+    formthis <-fs::path_file(xlsformpath) 
+    formthis <-  stringr::str_remove(formthis, ".xlsx")
     cat(paste0(formthis, "\n\n"))
-    xlsformpath = here::here(folder, formthis)
+    #xlsformpath = here::here(folder, formthis)
     #variables <- fct_tabulate_form(xlsformpath, label_language )
     settings <- readxl::read_excel(xlsformpath,  sheet = "settings")
     #form_instance <- as.character(settings$form_title)
     choices <- readxl::read_excel(xlsformpath, sheet = "choices") |>
       # dplyr::mutate(form_instance = form_instance)|>
-      dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+      #dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+      dplyr::mutate(form_file =  formthis ) |>
       #  Rename and use what ever label set is coming first
       dplyr::rename(label = ifelse( is.null(label_language), 
                                     dplyr::first(tidyselect::starts_with("label")),
@@ -162,10 +175,13 @@ fct_xlsform_compare <- function( listfile,
                                                     label.diff == label ~  NA_character_,
                                                     label.diff != label ~  label.diff )
                       #label.diff = dplyr::if_else(is.na(label),label.diff , dplyr::if_else( label.diff == label, NA_character_, label.diff ))
-      )
+                    )
+    
+    
     ## Rename diff based on type and file origin
     eval(parse(text=paste0("choicescompare$label.ifdiff.", 
-                           stringr::str_remove(formthis, ".xlsx"),
+                          # stringr::str_remove(formthis, ".xlsx"),
+                          formthis,
                            " <- choicescompare$label.diff ") ))
     choicescompare$label.diff <- NULL
     choicescompare$form_file <- NULL
@@ -174,7 +190,7 @@ fct_xlsform_compare <- function( listfile,
     
     
     ## Now variable ####
-      survey <-  readxl::read_excel(xlsformpath, sheet = "survey")
+    survey <-  readxl::read_excel(xlsformpath, sheet = "survey")
     if ("required" %in% colnames(survey)) {   } else {    survey$required <- ""   }
     if ("relevant" %in% colnames(survey)) {   } else {    survey$relevant <- ""   }
     if ("constraint" %in% colnames(survey)) {   } else {    survey$constraint <- ""   }
@@ -188,7 +204,8 @@ fct_xlsform_compare <- function( listfile,
                                     dplyr::first(tidyselect::starts_with("hint")),
                                     paste0("hint",label_language))   ) |>
       #dplyr::mutate(form_instance = form_instance)|>
-      dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+      #dplyr::mutate(form_file = stringr::str_remove(formthis, ".xlsx")) |>
+      dplyr::mutate(form_file = formthis) |>
       # Clean the begin and end in case the _ would be missing...
       dplyr::mutate(type = dplyr::recode(type,
                                          "begin group" = "begin_group" ,
@@ -258,49 +275,56 @@ fct_xlsform_compare <- function( listfile,
     eval(parse(
       text = paste0(
         "variablescompare$type.ifdiff.",
-        stringr::str_remove(formthis, ".xlsx"),
+        formthis,
+        #stringr::str_remove(formthis, ".xlsx"),
         " <- variablescompare$type.diff "
       )
     ))
     eval(parse(
       text = paste0(
         "variablescompare$list_name.ifdiff.",
-        stringr::str_remove(formthis, ".xlsx"),
+        formthis,
+        # stringr::str_remove(formthis, ".xlsx"),
         " <- variablescompare$list_name.diff "
       )
     ))
     eval(parse(
       text = paste0(
         "variablescompare$label.ifdiff.",
-        stringr::str_remove(formthis, ".xlsx"),
+        formthis,
+        # stringr::str_remove(formthis, ".xlsx"),
         " <- variablescompare$label.diff "
       )
     ))
     eval(parse(
       text = paste0(
         "variablescompare$hint.ifdiff.",
-        stringr::str_remove(formthis, ".xlsx"),
+        formthis,
+        # stringr::str_remove(formthis, ".xlsx"),
         " <- variablescompare$hint.diff "
       )
     ))
     eval(parse(
       text = paste0(
         "variablescompare$required.ifdiff.",
-        stringr::str_remove(formthis, ".xlsx"),
+        formthis,
+        # stringr::str_remove(formthis, ".xlsx"),
         " <- variablescompare$required.diff "
       )
     ))
     eval(parse(
       text = paste0(
         "variablescompare$constraint.ifdiff.",
-        stringr::str_remove(formthis, ".xlsx"),
+        formthis,
+        # stringr::str_remove(formthis, ".xlsx"),
         " <- variablescompare$constraint.diff "
       )
     ))
     eval(parse(
       text = paste0(
         "variablescompare$relevant.ifdiff.",
-        stringr::str_remove(formthis, ".xlsx"),
+        formthis,
+        # stringr::str_remove(formthis, ".xlsx"),
         " <- variablescompare$relevant.diff "
       )
     ))
@@ -385,7 +409,8 @@ fct_xlsform_compare <- function( listfile,
         openxlsx::writeData(wb, sheetname, choicescompare, withFilter = TRUE)
         openxlsx::setColWidths(wb, sheetname, cols = 1:ncol(choicescompare), widths = "auto")
 
-        xlsformpathout <- here::here(folder,fileout)
+        #xlsformpathout <- here::here(folder,fileout)
+        xlsformpathout <-  fileout
        # wb
         if (file.exists(xlsformpathout)) file.remove(xlsformpathout)
         cat( paste0(xlsformpathout,"\n"))
