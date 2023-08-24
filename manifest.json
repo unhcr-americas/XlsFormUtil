@@ -255,7 +255,7 @@
         "Description": "Output nicely printed version of an xlsform This approach\nallows to develop a questionnaire and offer version for revision based\non an a master version maintained directly within the xlform format.",
         "License": "MIT + file LICENSE",
         "URL": "https://github.com/unhcr-americas/XlsFormUtil",
-        "Imports": "cli,\nconfig,\ndplyr,\nflextable,\nforcats,\nggplot2,\ngolem,\nhere,\nofficer,\nopenxlsx,\npurrr,\nreadxl,\nrmarkdown,\nshiny,\nshinydashboard,\nstringr,\ntidyr,\ntidyselect,\ntidyverse,\nunhcrshiny,\nutils",
+        "Imports": "cli,\nconfig,\ndplyr,\nflextable,\nforcats,\nfs,\nggplot2,\ngolem,\nhere,\nofficer,\nopenxlsx,\npurrr,\nreadxl,\nrmarkdown,\nshiny,\nshinydashboard,\nstringr,\ntidyr,\ntidyselect,\ntidyverse,\nunhcrshiny,\nutils",
         "Suggests": "knitr,\nspelling,\ntestthat",
         "VignetteBuilder": "knitr",
         "Remotes": "edouard-legoupil/unhcrshiny",
@@ -5617,7 +5617,7 @@
       "checksum": "0717953d2f6deb402a364b5a61187911"
     },
     "DESCRIPTION": {
-      "checksum": "1bd72d274c52f34bd248b020314e98e7"
+      "checksum": "f56b815ac73f0afb58e4d2cb8e804d01"
     },
     "dev/01_dev.R": {
       "checksum": "cc18ab863a059c53603cb5b8dc53f087"
@@ -5626,10 +5626,10 @@
       "checksum": "a7efc9ea3e81f3b8936c1353cdbbf252"
     },
     "dev/config_fusen.yaml": {
-      "checksum": "7adbb71f00fbd3822ccac2ca044bf0a6"
+      "checksum": "a10455300c1708940b1fa6d4d7203daa"
     },
     "dev/function_documentation.Rmd": {
-      "checksum": "a17d8521765ee6ff3f0118906869fc02"
+      "checksum": "8ccbeda75232419fc43e1f6625dd55ce"
     },
     "dev/githublink.R": {
       "checksum": "a6a6287587b0768a286e4466d24d584f"
@@ -5650,7 +5650,7 @@
       "checksum": "fb56f94a8d449952c71f7403d7d97afe"
     },
     "docs/articles/development.html": {
-      "checksum": "33c4226dd43c5906ff651c391c75d0a2"
+      "checksum": "57f612c2a4ba071ffc614d56390d2ea1"
     },
     "docs/articles/index.html": {
       "checksum": "0501fa910eb5d7f14140401a05877a5a"
@@ -5719,10 +5719,10 @@
       "checksum": "9c627b6b2c41322b8f362fac07a2ae5a"
     },
     "docs/pkgdown.yml": {
-      "checksum": "81377a9e7018775b3c9d3bab1c4c9845"
+      "checksum": "4e9918674a1f1939ad6ea0e32a601f50"
     },
     "docs/reference/fct_create_flextable.html": {
-      "checksum": "df6a29dae476858ced9fb5ae7aa5df9b"
+      "checksum": "b6a4c0cff46d389bb6c03f741a9745a6"
     },
     "docs/reference/fct_interview_duration-1.png": {
       "checksum": "c90235f85f98612e583b2a1be9b52bdb"
@@ -5731,13 +5731,13 @@
       "checksum": "857d3bd3c9482c76d35af2691cbdea94"
     },
     "docs/reference/fct_render_prettyprint.html": {
-      "checksum": "b0a9fb8fd5cfbb95eed7382d7dc40a7d"
+      "checksum": "703e60c73b3f4ca7d5d232ea80f5a95d"
     },
     "docs/reference/fct_tabulate_form.html": {
       "checksum": "9f4efd77ca6211508c366d336c737616"
     },
     "docs/reference/fct_xlsform_compare.html": {
-      "checksum": "f939ba6d800bbdc0c99111c15acb82ee"
+      "checksum": "eaa8da8fc0692ba2235b296288fabd54"
     },
     "docs/reference/fct_xlsfrom_language.html": {
       "checksum": "bad37f98faa92b997ad60dd1a280137f"
@@ -5758,7 +5758,7 @@
       "checksum": "0fc5b1586ff7b518aa95deed0618661a"
     },
     "docs/search.json": {
-      "checksum": "ea5ff93c510041900070744d430a2ee6"
+      "checksum": "a5914b6cfaaeb0f972e39c54c7938fc4"
     },
     "docs/sitemap.xml": {
       "checksum": "0112c0215fe82f875fb40cde444f3d25"
@@ -5782,7 +5782,7 @@
       "checksum": "543a9ab50ca4709606c1154b8a99d836"
     },
     "inst/rmarkdown/templates/xlsform2word/skeleton/skeleton.Rmd": {
-      "checksum": "fd127b9fa1e14dd04002d4ea8b012353"
+      "checksum": "13f1d83564477fadbe3a10aaa1ddda17"
     },
     "inst/rmarkdown/templates/xlsform2word/template.yaml": {
       "checksum": "aee011f81157b0b5ec5c623ba437efe8"
@@ -5806,13 +5806,13 @@
       "checksum": "0a3d0df9cea64f82f5f8dd2723d22b23"
     },
     "man/fct_render_prettyprint.Rd": {
-      "checksum": "09e81e684982dfac65241a3db5333744"
+      "checksum": "c2fa65fe1759bc5267839a34571837cb"
     },
     "man/fct_tabulate_form.Rd": {
       "checksum": "46515fbfa16d1f03ed4447e10a725630"
     },
     "man/fct_xlsform_compare.Rd": {
-      "checksum": "53f68c456720058d911dbb9e077ae439"
+      "checksum": "904d1e7bf4fe0eafb8cca7022b16517e"
     },
     "man/fct_xlsfrom_language.Rd": {
       "checksum": "744979177a42b8dc30116213ea242dee"
@@ -5821,7 +5821,7 @@
       "checksum": "fa299b23be3d911524c2370aa0f4800e"
     },
     "NAMESPACE": {
-      "checksum": "4465f70ee8789c516d4b055409e91a61"
+      "checksum": "6124b2b3de5440752b79551811c7dc5a"
     },
     "R/app_config.R": {
       "checksum": "0b1d632fabbd04b4d570038358af507c"
@@ -5842,13 +5842,13 @@
       "checksum": "808b809e8a14b004c3bdc4c57edd2c2f"
     },
     "R/fct_render_prettyprint.R": {
-      "checksum": "ac38e4cd996cf67398b2326ca1f6b12f"
+      "checksum": "8adb2a458d78cbeebc7c5dd12315d05c"
     },
     "R/fct_tabulate_form.R": {
       "checksum": "344eb644b3e603722d5f8c0f2284d51f"
     },
     "R/fct_xlsform_compare.R": {
-      "checksum": "f4f1e7b7c0bbbd81a55c07e2cac77cd0"
+      "checksum": "7e84a9a12fe3f7cca34ac4caff667c98"
     },
     "R/fct_xlsfrom_language.R": {
       "checksum": "3661968df32cb2092ad12c91c1588f99"
@@ -5857,7 +5857,7 @@
       "checksum": "6bf948bdaadde73c62f107d934f9e227"
     },
     "R/header.R": {
-      "checksum": "a3e79657e383354faf550d9c97309257"
+      "checksum": "e31774129cc1b76dd516b1c168c3da28"
     },
     "R/mod_home.R": {
       "checksum": "f3c96307d81452d1ef0832b621400a9c"
@@ -5866,13 +5866,13 @@
       "checksum": "a99f9f09395e103f1f1035e3873ad8e5"
     },
     "R/mod_pretty_print.R": {
-      "checksum": "e933d55b1704bd030755a251bd93fc12"
+      "checksum": "e5eca9eee4aced8c8d1b7041011ebe0c"
     },
     "R/mod_upload_form.R": {
       "checksum": "2bab95cc7ac5b84be6c57d7fb52b7fb2"
     },
     "R/mod_xlsform_compare.R": {
-      "checksum": "dbd4b6443250830b3c9e7673fc0bc050"
+      "checksum": "8e7084a50e4199b82c66fd27e95605a2"
     },
     "R/run_app.R": {
       "checksum": "e9b2822f802a2fed9e5800d17fa8c855"
@@ -5917,7 +5917,7 @@
       "checksum": "427b050fe790dd35e59f4c138859361c"
     },
     "vignettes/development.Rmd": {
-      "checksum": "c822cb9cd3841ae2246c789c7ef85fd2"
+      "checksum": "8b4d789c04df9678884fc2d756590a58"
     }
   },
   "users": null
