@@ -14,9 +14,9 @@ sidebar <- function() {
       shinydashboard::menuItem("About",tabName = "home",icon = icon("bookmark")),
       
       shinydashboard::menuItem("Upload an XlsForm",tabName = "upload_form",icon = icon("highlighter")),
+      shinydashboard::menuItem("Compare with Base Form",tabName = "xlsform_compare",icon = icon("code-compare")),
       shinydashboard::menuItem("Estimate Interview Duration",tabName = "interview_duration",icon = icon("clock")),
-      shinydashboard::menuItem("Generate Word Version",tabName = "pretty_print",icon = icon("print")),
-      shinydashboard::menuItem("Compare with Base Form",tabName = "xlsform_compare",icon = icon("code-compare"))
+      shinydashboard::menuItem("Generate Word Version",tabName = "pretty_print",icon = icon("print"))
       
       
       # - add more - separated by a comma!

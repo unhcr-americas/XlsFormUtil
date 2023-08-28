@@ -16,15 +16,23 @@ mod_home_ui <- function(id) {
 		  ### Get the name for your tool
 		  p(
 		    tags$span("XlsForm ", style = "font-size: 60px"),
-		    tags$span("Utilities", style = "font-size: 24px")
+		    tags$span("Utilities", style = "font-size: 34px")
 		  ),
 		  br(),
 		  ### Then a short explainer
-		  p("This app brings additional capacities when designing XlsForm questionnaires: 
-		          1.) Estimation of Duration to avoid long interview;  
-		          2.) Pretty Print in Word to faciliate peers comments; 
-		          3.) systematic comparison between a contextualised version and the original template.",
-		    style = "font-size: 20px"),
+		  p("This app brings additional capacities when designing XlsForm questionnaires in the context of Household Surveys: ",
+		    style = "font-size: 22px"),
+		  hr(),
+		  p("1.) Ensure a systematic comparison between a contextualised version and the global standard template for the form. This is key to avoid breaking up indicator calculation script!",
+		    style = "font-size: 18px"),
+		  hr(),
+		  p(" 2.) Estimate the duration to avoid long interview according to different parameters.",
+		style = "font-size: 18px"),
+		hr(),
+	  	p(" 3.) Generate a Pretty Print in Word to facilitate the recollection of peers comments within the operation using tracking mode. 
+	  	  This is to avoid a situation where 2 versions of the from are managed in parallel (i.e. the word one is generated form the xlsform).",
+		    style = "font-size: 18px"),
+		hr(),
 		  br(),
 		  br(),
 		  p(tags$i( class = "fa fa-github"),

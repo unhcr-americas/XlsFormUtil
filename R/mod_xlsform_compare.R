@@ -24,7 +24,6 @@ mod_xlsform_compare_ui <- function(id) {
 			  important variables, needed later during the data analysis by the ",
 			  tags$a(href="https://rstudio.unhcr.org/RBM-indicators/",
 			         "Indicator Calculation Automation Scripts"),
-			  br(),
 			  ", are not overlooked. A frequent problem, for example, involves confusion 
 			  regarding the encoding of choice variable names, which are actually
 			  represented using numerical codes. ",
