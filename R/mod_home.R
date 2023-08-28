@@ -30,7 +30,7 @@ mod_home_ui <- function(id) {
 		style = "font-size: 18px"),
 		hr(),
 	  	p(" 3.) Generate a Pretty Print in Word to facilitate the recollection of peers comments within the operation using tracking mode. 
-	  	  This is to avoid a situation where 2 versions of the from are managed in parallel (i.e. the word one is generated form the xlsform).",
+	  	  This is to avoid a situation where 2 versions of the from are managed in parallel (i.e. the word one is generated from the xlsform file).",
 		    style = "font-size: 18px"),
 		hr(),
 		  br(),
