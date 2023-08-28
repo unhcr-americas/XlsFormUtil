@@ -5860,7 +5860,7 @@
       "checksum": "e31774129cc1b76dd516b1c168c3da28"
     },
     "R/mod_home.R": {
-      "checksum": "f3c96307d81452d1ef0832b621400a9c"
+      "checksum": "a0e5d34b18431056b88cce50fba5f693"
     },
     "R/mod_interview_duration.R": {
       "checksum": "a99f9f09395e103f1f1035e3873ad8e5"
@@ -5872,13 +5872,13 @@
       "checksum": "ff916bd80218979f1c03dc13e1c1b6b8"
     },
     "R/mod_xlsform_compare.R": {
-      "checksum": "d4e66172d9f1d12326850a8f6a79f648"
+      "checksum": "2ee7a4c5d32bfd8e61ea6387ff5bcb55"
     },
     "R/run_app.R": {
       "checksum": "e9b2822f802a2fed9e5800d17fa8c855"
     },
     "R/sidebar.R": {
-      "checksum": "31a7b2fce05f9bf4108ea763fac5aa89"
+      "checksum": "49f266fc1d5b3c31d808b8a30a103b6b"
     },
     "README.md": {
       "checksum": "a0e33846d5e492db67d8f94e7b48f07f"
