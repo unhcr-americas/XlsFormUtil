@@ -255,15 +255,28 @@
         "Description": "Output nicely printed version of an xlsform This approach\nallows to develop a questionnaire and offer version for revision based\non an a master version maintained directly within the xlform format.",
         "License": "MIT + file LICENSE",
         "URL": "https://github.com/unhcr-americas/XlsFormUtil",
-        "Imports": "cli,\nconfig,\ndplyr,\nflextable,\nforcats,\nfs,\nggplot2,\ngolem,\nhere,\nofficer,\nopenxlsx,\npurrr,\nreadxl,\nrmarkdown,\nshiny,\nshinydashboard,\nstringr,\ntidyr,\ntidyselect,\ntidyverse,\nunhcrshiny,\nutils",
-        "Suggests": "knitr,\nspelling,\ntestthat",
+        "Imports": "cli, config, dplyr, flextable, forcats, fs, ggplot2, golem,\nhere, officer, openxlsx, purrr, readxl, rmarkdown, shiny,\nshinydashboard, stringr, tidyr, tidyselect, tidyverse,\nunhcrshiny, utils",
+        "Suggests": "knitr, spelling, testthat",
         "VignetteBuilder": "knitr",
         "Remotes": "edouard-legoupil/unhcrshiny",
         "Config/fusen/version": "0.5.2",
         "Encoding": "UTF-8",
         "Language": "en-US",
-        "LazyData": "true",
-        "RoxygenNote": "7.2.3.9000"
+        "RoxygenNote": "7.2.3.9000",
+        "RemoteType": "github",
+        "RemoteHost": "api.github.com",
+        "RemoteRepo": "XlsFormUtil",
+        "RemoteUsername": "unhcr-americas",
+        "RemoteRef": "HEAD",
+        "RemoteSha": "1564157d7c1670181efc6326b3564e0a69a8a575",
+        "GithubRepo": "XlsFormUtil",
+        "GithubUsername": "unhcr-americas",
+        "GithubRef": "HEAD",
+        "GithubSHA1": "1564157d7c1670181efc6326b3564e0a69a8a575",
+        "NeedsCompilation": "no",
+        "Packaged": "2023-08-28 16:45:46 UTC; edouard",
+        "Author": "Edouard Legoupil [aut, cre]",
+        "Built": "R 4.3.1; ; 2023-08-28 16:45:46 UTC; unix"
       }
     },
     "askpass": {
@@ -5860,7 +5873,7 @@
       "checksum": "e31774129cc1b76dd516b1c168c3da28"
     },
     "R/mod_home.R": {
-      "checksum": "a0e5d34b18431056b88cce50fba5f693"
+      "checksum": "5e30c33a6e35480b704ed56da8a1ef23"
     },
     "R/mod_interview_duration.R": {
       "checksum": "a99f9f09395e103f1f1035e3873ad8e5"
