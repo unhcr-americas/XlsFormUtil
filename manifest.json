@@ -5629,7 +5629,7 @@
       "checksum": "a10455300c1708940b1fa6d4d7203daa"
     },
     "dev/function_documentation.Rmd": {
-      "checksum": "8ccbeda75232419fc43e1f6625dd55ce"
+      "checksum": "14c3b8725f69955e04cde8cff661e25d"
     },
     "dev/githublink.R": {
       "checksum": "a6a6287587b0768a286e4466d24d584f"
@@ -5821,7 +5821,7 @@
       "checksum": "fa299b23be3d911524c2370aa0f4800e"
     },
     "NAMESPACE": {
-      "checksum": "6124b2b3de5440752b79551811c7dc5a"
+      "checksum": "80a017d49e2cbe2946b135ac0307a4a9"
     },
     "R/app_config.R": {
       "checksum": "0b1d632fabbd04b4d570038358af507c"
@@ -5848,7 +5848,7 @@
       "checksum": "344eb644b3e603722d5f8c0f2284d51f"
     },
     "R/fct_xlsform_compare.R": {
-      "checksum": "7e84a9a12fe3f7cca34ac4caff667c98"
+      "checksum": "79d820c146a2f9833e08f6cb077a7f7d"
     },
     "R/fct_xlsfrom_language.R": {
       "checksum": "3661968df32cb2092ad12c91c1588f99"
@@ -5869,10 +5869,10 @@
       "checksum": "e5eca9eee4aced8c8d1b7041011ebe0c"
     },
     "R/mod_upload_form.R": {
-      "checksum": "2bab95cc7ac5b84be6c57d7fb52b7fb2"
+      "checksum": "ff916bd80218979f1c03dc13e1c1b6b8"
     },
     "R/mod_xlsform_compare.R": {
-      "checksum": "8e7084a50e4199b82c66fd27e95605a2"
+      "checksum": "d4e66172d9f1d12326850a8f6a79f648"
     },
     "R/run_app.R": {
       "checksum": "e9b2822f802a2fed9e5800d17fa8c855"
