@@ -76,6 +76,8 @@ mod_upload_form_ui <- function(id) {
 #' @noRd 
 #' @import shiny 
 #' @import tidyverse 
+#' @importFrom stringr str_remove str_to_lower str_replace_all  regex
+#' @importFrom  fs path_file
 #' @keywords internal
  
 mod_upload_form_server <- function(input, output, session, AppReactiveValue) {
@@ -92,6 +94,34 @@ mod_upload_form_server <- function(input, output, session, AppReactiveValue) {
 	  req(input$xlsform)
 	  message("Please upload a file")
 	  AppReactiveValue$xlsformpath <- input$xlsform$datapath
+	  
+	  AppReactiveValue$xlsformfilename <- 
+	    stringr::str_to_lower(
+	      stringr::str_replace_all(
+	        stringr::str_remove(
+	          input$xlsform$name,
+	          ".xlsx"),
+	        stringr::regex("[^a-zA-Z0-9]"), "_"))
+	  
+	  ## change file  in the server to the correct name
+	  file.rename(AppReactiveValue$xlsformpath, # from
+	              
+	              paste0( dirname(AppReactiveValue$xlsformpath) , 
+	                      "/",
+	                      AppReactiveValue$xlsformfilename,
+	                      ".xlsx")
+	              ## to
+	  )
+	  
+	  AppReactiveValue$xlsformpath <-  paste0( dirname(AppReactiveValue$xlsformpath) , 
+	                                               "/",
+	                                           AppReactiveValue$xlsformfilename,
+	                                               ".xlsx")
+	  
+	  
+	    
+	   
+	  
 	  #browser()
 	  updateSelectInput(
 	      session = session,

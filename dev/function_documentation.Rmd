@@ -1066,7 +1066,7 @@ fct_render_prettyprint <- function(  dir,
 #' 
 #' @importFrom readxl read_excel
 #' @importFrom here here
-#' @importFrom stringr str_remove
+#' @importFrom stringr str_remove str_to_lower str_replace_all  regex
 #' @importFrom dplyr rename mutate group_by summarise filter mutate recode
 #'                first distinct select left_join filter pull ungroup full_join
 #' @importFrom readxl read_excel
@@ -1086,8 +1086,13 @@ fct_xlsform_compare <- function( listfile,
   # library(XlsFormUtil)
   #xlsformpath = here::here(folder, formthis)
    xlsformpath <- listfile[1]
-   formthis <-fs::path_file(xlsformpath) 
-   formthis <-  stringr::str_remove(formthis, ".xlsx")
+   formthis <-  stringr::str_remove(fs::path_file(xlsformpath), ".xlsx")
+   # formthis <- "Bad # % ? .. file name"
+   formthis <-stringr::str_to_lower(
+     stringr::str_replace_all(
+       formthis,
+                              stringr::regex("[^a-zA-Z0-9]"), "_"))
+    
 
   settings <- readxl::read_excel(xlsformpath,  sheet = "settings")
   #form_instance <- as.character(settings$form_title)
@@ -1169,8 +1174,13 @@ fct_xlsform_compare <- function( listfile,
   for ( i in 2:length(listfile ))  {
     # i <- 2
     xlsformpath <- listfile[i]
-    formthis <-fs::path_file(xlsformpath) 
-    formthis <-  stringr::str_remove(formthis, ".xlsx")
+    formthis <-  stringr::str_remove(
+      fs::path_file(xlsformpath),
+      ".xlsx")
+    formthis <-stringr::str_to_lower(
+     stringr::str_replace_all(
+       formthis,
+                              stringr::regex("[^a-zA-Z0-9]"), "_"))
     cat(paste0(formthis, "\n\n"))
     #xlsformpath = here::here(folder, formthis)
     #variables <- fct_tabulate_form(xlsformpath, label_language )

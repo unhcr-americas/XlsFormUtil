@@ -68,6 +68,8 @@ mod_xlsform_compare_ui <- function(id) {
 #' @noRd
 #' @import shiny
 #' @import tidyverse
+#' @importFrom stringr str_remove str_to_lower str_replace_all  regex
+#' @importFrom  fs path_file
 #' @keywords internal
 
 mod_xlsform_compare_server <- function(input, output, session, AppReactiveValue) {
@@ -79,6 +81,31 @@ mod_xlsform_compare_server <- function(input, output, session, AppReactiveValue)
 	  message("Please upload a file")
 	  AppReactiveValue$xlsformbasepath <- input$xlsformbase$datapath
 	  #browser()
+	  
+	  ## get also filename in a clean way
+	  AppReactiveValue$xlsformbasefilename <-  
+	    stringr::str_to_lower(
+	      stringr::str_replace_all(
+	        stringr::str_remove(
+	          input$xlsformbase$name,
+	          ".xlsx"),
+	        stringr::regex("[^a-zA-Z0-9]"), "_")) 
+	  
+	  ## change file  in the server to the correct name
+	  file.rename(AppReactiveValue$xlsformbasepath, # from
+	              
+	              paste0( dirname(AppReactiveValue$xlsformbasepath) , 
+	                      "/",
+	              AppReactiveValue$xlsformbasefilename,
+	              ".xlsx")
+	              ## to
+	              )
+	  
+	  AppReactiveValue$xlsformbasepath <-  paste0( dirname(AppReactiveValue$xlsformbasepath) , 
+	                                               "/",
+	                                               AppReactiveValue$xlsformbasefilename,
+	                                               ".xlsx")
+	  
 	})
 
 	# output$compare <- downloadHandler(
@@ -101,7 +128,11 @@ mod_xlsform_compare_server <- function(input, output, session, AppReactiveValue)
 	
 	output$compare <- downloadHandler( 
 	  filename = function(){
-	    paste( 'xlsform_comparison',Sys.time(), '.xlsx')
+	    paste( 'xlsform_comparison_from', 
+	           AppReactiveValue$xlsformbasefilename, 
+	           '_to_',
+	           AppReactiveValue$xlsformfilename, 
+	           '.xlsx')
 	  },
 	  content = function(file){
 	    fct_xlsform_compare(listfile = c(AppReactiveValue$xlsformbasepath, 
