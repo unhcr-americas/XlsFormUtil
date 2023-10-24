@@ -35,8 +35,8 @@ The packages is also available as a shinyApp @ [https://rstudio.unhcr.org/XlsFor
 You can install the development version of XlsFormUtil from [GitHub](https://github.com/unhcr-americas/XlsFormUtil) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("unhcr-americas/XlsFormUtil")
+install.packages("pak")
+pak::pkg_install("unhcr-americas/XlsFormUtil")
 ```
 
 For developers, look fork the repository and look at the dev folder. 
