@@ -20,21 +20,22 @@ mod_home_ui <- function(id) {
 		  ),
 		  br(),
 		  ### Then a short explainer
-		  p("This app brings additional capacities when designing XlsForm questionnaires in the context of Household Surveys: ",
-		    style = "font-size: 22px"),
-		  hr(),
-		  p("1.) Ensure a systematic comparison between a contextualised version and the global standard template for the form. This is key to avoid breaking up indicator calculation script!",
-		    style = "font-size: 18px"),
-		  hr(),
-		  p(" 2.) Estimate the duration to avoid long interview according to different parameters.",
-		style = "font-size: 18px"),
-		hr(),
-	  	p(" 3.) Generate a Pretty Print in Word to facilitate the recollection of peers comments within the operation using tracking mode. 
-	  	  This is to avoid a situation where 2 versions of the from are managed in parallel (i.e. the word one is generated from the xlsform file).",
-		    style = "font-size: 18px"),
-		hr(),
+		  p(paste("This ",tags$span("companion app", style = "color:#00B398"), " brings additional functions when 
+		          designing questionnaire as XlsForm: 
+		          1.) Estimation of Duration to avoid long interview;  
+		          2.) Pretty Print in Word to faciliate peers comments; 
+		          3.) systematic comparison between a contextualised version and the original template."),
+		    style = "font-size: 20px; text-align: left;"),
 		  br(),
 		  br(),
+		  p("This app is part of a ",tags$span("comprehensive app toolkit", style = "color:#00B398"),
+		    " to enhance the process of survey implementation through Kobotoolbox. It includes: ",
+		    tags$a(href="https://rstudio.unhcr.org/rmsSampling/", "rmsSampling"), " to help designing sampling strategies, ",
+		    tags$a(href="https://rstudio.unhcr.org/Survey_Designer", "SurveyDesigner"), " to help integrating annual survey needs, ",
+		    tags$a(href="https://rstudio.unhcr.org/XlsFormUtil/", "XlsFormUtil"), " to help reviewing form contextualisation, ",
+		    tags$a(href="https://rstudio.unhcr.org/HighFrequencyChecks/", "HighFrequencyChecks"), " to monitor data collection quality, ",
+		    tags$a(href="https://rstudio.unhcr.org/kobocruncher/", "KoboCruncher"), " to perform rapid data exploration and compile indicators.",
+		    style = "font-size: 12px"),
 		  p(tags$i( class = "fa fa-github"),
 		    "App built with ",
 		    tags$a(href="https://edouard-legoupil.github.io/graveler/",
