@@ -20,11 +20,11 @@ mod_home_ui <- function(id) {
 		  ),
 		  br(),
 		  ### Then a short explainer
-		  p(paste("This ",tags$span("companion app", style = "color:#00B398"), " brings additional functions when 
+		  p( "This ",tags$span("companion app", style = "color:#00B398"), " brings additional functions when 
 		          designing questionnaire as XlsForm: 
 		          1.) Estimation of Duration to avoid long interview;  
 		          2.) Pretty Print in Word to faciliate peers comments; 
-		          3.) systematic comparison between a contextualised version and the original template."),
+		          3.) systematic comparison between a contextualised version and the original template." ,
 		    style = "font-size: 20px; text-align: left;"),
 		  br(),
 		  br(),
